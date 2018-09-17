@@ -7,9 +7,9 @@ def binary_search(target, array) #need to be sorted array
 		mid = array.size / 2
 	# if logic for slicing array for next iteration
 		if target == array[mid]
-			return target
+			return array[mid]
 		elsif target < array[mid]
-			array = array[0, mid]
+			array = array[min, mid]
 		elsif target > array[mid]
 			array = array[(mid + 1), max]	
 		end
@@ -27,7 +27,7 @@ def binary_search_recursion(target, array)
 	return nil if array.size == 0 # if array size is less then 1 target not in array return nil
 	# recursion call
 	if target < array[mid]
-		binary_search_recursion(target,array[0, mid])
+		binary_search_recursion(target,array[min, mid])
 	else
 		binary_search_recursion(target, array[(mid + 1), max])
 	end

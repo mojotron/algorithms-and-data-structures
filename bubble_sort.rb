@@ -10,7 +10,6 @@ def bubble_sort(array)
       i += 1   
     end
     break if swaps == false # *and we exit loop, no need for n loops
-    p array
   end
   array
 end

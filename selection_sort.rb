@@ -1,19 +1,17 @@
 def selection_sort(array)
 	(array.size).times do |x|
-		
-		min = array[x]
-		min_i = x
-		i = x
+		i = x #index of sorted part of array
+		min = array[x] #lowest value elemnt
+		min_i = x #index of element with lowest value
 		while i < array.size
-			if min > array[i]
+			if min > array[i] #search for lowest value in unsorted part of array
 				min = array[i]
-				min_i = i 
+				min_i = i #keep track of lowest element index
 			end
 			i += 1
 		end
-		array[x], array[min_i] = array[min_i], array[x]
+		array[x], array[min_i] = array[min_i], array[x] #make swap
 		end
-	
 	array
 end
 

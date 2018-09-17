@@ -3,9 +3,8 @@ def insertion_sort(array)
   until i == array.size # we check every element in array
     j = i # counter for inner loop, set to i we comparing elements from right to left in inner loop
     while j > 0 && array[j] < array[j - 1] # additional condition to skip if swap no needed
-      if array[j] < array[j - 1] # if condition is true we swap position of elements
+    # if condition is true we swap position of elements
         array[j], array[j - 1] = array[j - 1], array[j]
-      end
       j -= 1
     end
     i += 1
