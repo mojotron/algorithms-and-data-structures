@@ -17,3 +17,10 @@ The simplest worst case input is an array sorted in reverse order. The set of al
 
  ## Selection Sort
  In computer science, selection sort is a sorting algorithm, specifically an in-place comparison sort. It has O(n2) time complexity, making it inefficient on large lists. The algorithm divides the input list into two parts: the sublist of items already sorted, which is built up from left to right at the front (left) of the list, and the sublist of items remaining to be sorted that occupy the rest of the list. Initially, the sorted sublist is empty and the unsorted sublist is the entire input list. The algorithm proceeds by finding the smallest (or largest, depending on sorting order) element in the unsorted sublist, exchanging (swapping) it with the leftmost unsorted element (putting it in sorted order), and moving the sublist boundaries one element to the right. Learn more on [wikipedia](https://en.wikipedia.org/wiki/Selection_sort).
+
+ ## Merge Sort
+ An efficient, general-purpose, comparison-based sorting algorithm. Most implementations produce a stable sort, which means that the implementation preserves the input order of equal elements in the sorted output. Merge sort is a divide and conquer algorithm.
+ Conceptually, a merge sort works as follows:
+1. Divide the unsorted list into n sublists, each containing 1 element (a list of 1 element is considered sorted).
+2. Repeatedly merge sublists to produce new sorted sublists until there is only 1 sublist remaining. This will be the sorted list.
+In sorting n objects, merge sort has an average and worst-case performance of O(n log n). Merge helper method takes time 0(n). Learn more on [wikipedia](https://en.wikipedia.org/wiki/Merge_sort).
