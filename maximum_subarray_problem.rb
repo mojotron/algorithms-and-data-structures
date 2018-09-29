@@ -50,7 +50,7 @@ def maximum_subarray_brute_force(array) #using brute_force solution
     until x == array.size
       if array[x, y].size == y #condion to eliminate leftovers, 
         #p array[x, y]          #if array is size of 4 and we take chunk of size 3, we have 1 left over        
-        if total < array[x, y].sum #main conditio for searchin maximum subarray
+        if total < array[x, y].sum #main condition for searching maximum subarray
           total = array[x, y].sum
           chunk = array[x, y]
         end
@@ -65,4 +65,4 @@ end
 x = [3, -2, 5, -1]
 y = [-2, -5, 6, -2, -3, 1, 5, -6]
 z = [13, -3, -25, 20, -3, -16, -23, 18, 20, -7, 12, -5, -22, 15, -4, 7]
-p kadane_algorithm(y)
+p maximum_subarray_brute_force(z)
