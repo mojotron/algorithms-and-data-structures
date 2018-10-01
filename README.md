@@ -40,9 +40,15 @@ c. Maximum subarray sum such that the subarray crosses the midpoint
 So we can divide the array up into three bits and look at each in turn to see where the largest pieces are, then compare them.
 Learn more on [Geeks-for-geeks](https://www.geeksforgeeks.org/maximum-subarray-sum-using-divide-and-conquer-algorithm/), and on [Amber Wilkie](https://medium.com/craft-academy/intro-to-algorithms-chapter-four-the-maximum-sub-array-problem-7d02b178b55c) great blog post.
 3. Solution with Kadane's Algorithm
-Kadane's algorithm is based on splitting up the set of possible solutions into mutually exclusive (disjoint) sets. It exploits the fact that any solution (i.e., any member of the set of solutions) will always have a last element i {\displaystyle i} i (this is what is meant by "sum ending at position i {\displaystyle i} i"). Thus, we simply have to examine, one by one, the set of solutions whose last element's index is 1 {\displaystyle 1} 1, the set of solutions whose last element's index is 2 {\displaystyle 2} 2, then 3 {\displaystyle 3} 3, and so forth to n {\displaystyle n} n. It turns out that this process can be carried out in linear time. The runtime complexity of Kadane's algorithm is O ( n ) {\displaystyle O(n)} O(n). Learn more on [wikipedia](https://en.wikipedia.org/wiki/Maximum_subarray_problem).
+Kadane's algorithm is based on splitting up the set of possible solutions into mutually exclusive (disjoint) sets. It exploits the fact that any solution (i.e., any member of the set of solutions) will always have a last element i (this is what is meant by "sum ending at position i"). Thus, we simply have to examine, one by one, the set of solutions whose last element's index is 1, the set of solutions whose last element's index is 2, then 3, and so forth to n. It turns out that this process can be carried out in linear time. The runtime complexity of Kadane's algorithm is O (n). Learn more on [wikipedia](https://en.wikipedia.org/wiki/Maximum_subarray_problem).
 
 ## Matrix multiplication algorithm
 1. Iterative algorithm
 The definition of matrix multiplication is that if C = AB for an n × m matrix A and an m × p matrix B, then C is an n × p matrix with entries. Algorithm can be constructed which loops over the indices i from 1 through n and j from 1 through p, computing the above using a 3 nested loops. This algorithm takes time Θ(nmp) (in asymptotic notation) in which case the running time is Θ(n3), i.e., cubic.
 2. Divide and conquer algorithm
+Relies on the block partitioning, which works for all square matrices whose dimensions are powers of two, i.e., the shapes are 2n × 2n for some n. The matrix product is now which consists of eight multiplications of pairs of submatrices, followed by an addition step. The divide and conquer algorithm computes the smaller multiplications recursively, using the scalar multiplication c11 = a11 x b11 as its base case. The complexity of this algorithm is Θ(n3), the same as the iterative algorithm.
+Learn more on [wikipedia](https://en.wikipedia.org/wiki/Matrix_multiplication_algorithm).
+3. Strassens algorithm
+The Strassen algorithm is using 7 multiplications instead of 8. 
+The complexity of Strassen’s matrix multiplication algorithm is O(nlog7). 
+Learn more on [wikipedia](https://en.wikipedia.org/wiki/Strassen_algorithm).

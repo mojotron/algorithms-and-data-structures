@@ -1,4 +1,4 @@
-def square_matrix_multipication(matrix_a, matrix_b) #iteration
+def iterativ_matrix_multipication(matrix_a, matrix_b) #matrix multipication with iterative technique
   matrix_c = create_new_square_matrix(matrix_a, matrix_b)
   #instead of helper method more ruby way sintax
   #matrix_d = Array.new(matrix_a.length){Array.new(matrix_b[0].length) {nil}}
@@ -15,30 +15,76 @@ def square_matrix_multipication(matrix_a, matrix_b) #iteration
   matrix_c
 end
 
-def square_matrix(a,b)
+def recursive_matrix_multiplication(a,b) #recursive matrix multipication with divide and conquer technique
   #works only on n * n matrices, A and B must be same dimensions n * n
   c = create_new_square_matrix(a,b)
-  if a.size == 2
+  if a.size == 2 #base case standard mutiplication formulas for 2*2 matrices
     c[0][0] = (a[0][0] * b[0][0]) + (a[0][1] * b[1][0])
     c[0][1] = (a[0][0] * b[0][1]) + (a[0][1] * b[1][1])
     c[1][0] = (a[1][0] * b[0][0]) + (a[1][1] * b[1][0])
     c[1][1] = (a[1][0] * b[0][1]) + (a[1][1] * b[1][1])
-  else
-    c11 = add_matrices(square_matrix(cut_matrix(a)[:x11], cut_matrix(b)[:x11]),
-        square_matrix(cut_matrix(a)[:x12], cut_matrix(b)[:x21]))
+  else #case matrices are bigger then 2*2 we recursivli split them and add them like in standart formulas for 2*2
+    #cut_matrix method pull out right submatrix and add_matrices method does matrix addition, can't do scalar
+    c11 = add_matrices(recursive_matrix_multiplication(cut_matrix(a)[:x11], cut_matrix(b)[:x11]),
+        recursive_matrix_multiplication(cut_matrix(a)[:x12], cut_matrix(b)[:x21]))
     
-    c12 = add_matrices(square_matrix(cut_matrix(a)[:x11], cut_matrix(b)[:x12]),
-        square_matrix(cut_matrix(a)[:x12], cut_matrix(b)[:x22]))
+    c12 = add_matrices(recursive_matrix_multiplication(cut_matrix(a)[:x11], cut_matrix(b)[:x12]),
+      recursive_matrix_multiplication(cut_matrix(a)[:x12], cut_matrix(b)[:x22]))
      
-    c21 = add_matrices(square_matrix(cut_matrix(a)[:x21], cut_matrix(b)[:x11]), 
-        square_matrix(cut_matrix(a)[:x22], cut_matrix(b)[:x21]))
+    c21 = add_matrices(recursive_matrix_multiplication(cut_matrix(a)[:x21], cut_matrix(b)[:x11]), 
+        recursive_matrix_multiplication(cut_matrix(a)[:x22], cut_matrix(b)[:x21]))
     
-    c22 = add_matrices(square_matrix(cut_matrix(a)[:x21], cut_matrix(b)[:x12]), 
-        square_matrix(cut_matrix(a)[:x22], cut_matrix(b)[:x22]))
-
+    c22 = add_matrices(recursive_matrix_multiplication(cut_matrix(a)[:x21], cut_matrix(b)[:x12]), 
+        recursive_matrix_multiplication(cut_matrix(a)[:x22], cut_matrix(b)[:x22]))
+    #after 8 recursive calls new matrix must be assebled, beacuse there are 4 2*2 matrices
     c = matrix_assemble([c11, c12, c21, c22])
   end
   c
+end
+
+def strassen_matrix_multiplication(a,b)
+  #works only on n * n matrices, A and B must be same dimensions n * n
+  c = create_new_square_matrix(a, b)
+  if a.size == 2 #base case matrices are size of 2*2
+    #to cut down number of mutiplicatons in recursiin calls, we use these 7 formulas which add more
+    #addition and subtraction which is better then multiplication for speed and memory useage
+    x1 = (a[0][0] + a[1][1]) * (b[0][0] + b[1][1])
+    x2 = (a[1][0] + a[1][1]) * b[0][0]
+    x3 = a[0][0] * (b[0][1] - b[1][1])
+    x4 = a[1][1] * (b[1][0] - b[0][0])
+    x5 = (a[0][0] + a[0][1]) * b[1][1]
+    x6 = (a[1][0] - a[0][0]) * (b[0][0] + b[0][1])
+    x7 = (a[0][1] - a[1][1]) * (b[1][0] + b[1][1])
+    #change result matrix elements with proper value, using these formulas
+    c[0][0] = x1 + x4 - x5 + x7
+    c[0][1] = x3 + x5
+    c[1][0] = x2 + x4
+    c[1][1] = x1 + x3 - x2 + x6
+  else #case mtrices are bigger then 2*2, 7 recursion calles are needed to calculte result matrix
+    #repet if statement but with matrix opetations instead of scalar
+    m1 = strassen_matrix_multiplication(add_matrices(cut_matrix(a)[:x11], cut_matrix(a)[:x22]),
+        add_matrices(cut_matrix(b)[:x11], cut_matrix(b)[:x22]))
+    m2 = strassen_matrix_multiplication(add_matrices(cut_matrix(a)[:x21], cut_matrix(a)[:x22]),
+        cut_matrix(b)[:x11])
+    m3 = strassen_matrix_multiplication(cut_matrix(a)[:x11], 
+        subtract_matrices(cut_matrix(b)[:x12], cut_matrix(b)[:x22]))
+    m4 = strassen_matrix_multiplication(cut_matrix(a)[:x22],
+        subtract_matrices(cut_matrix(b)[:x21], cut_matrix(b)[:x11]))
+    m5 = strassen_matrix_multiplication(add_matrices(cut_matrix(a)[:x11], cut_matrix(a)[:x12]),
+        cut_matrix(b)[:x22])
+    m6 = strassen_matrix_multiplication(subtract_matrices(cut_matrix(a)[:x21], cut_matrix(a)[:x11]),
+        add_matrices(cut_matrix(b)[:x11], cut_matrix(b)[:x12]))
+    m7 = strassen_matrix_multiplication(subtract_matrices(cut_matrix(a)[:x12], cut_matrix(a)[:x22]), 
+        add_matrices(cut_matrix(b)[:x21], cut_matrix(b)[:x22]))
+
+    c11= add_matrices(subtract_matrices(add_matrices(m1, m4), m5), m7)
+    c12 = add_matrices(m3, m5)
+    c21 = add_matrices(m2, m4)
+    c22 = add_matrices(subtract_matrices(add_matrices(m1, m3), m2), m6)
+
+    c = matrix_assemble([c11,c12,c21,c22])
+  end
+  c 
 end
 
 def create_new_square_matrix(matrix_a, matrix_b) #helper method
@@ -75,8 +121,18 @@ def add_matrices(a,b)#helper method
   #so ther must be matrices addition, by adding the corresponding entries together
   c = Array.new(a.size){Array.new(a[0].size){0}}
   for i in (0...a.size)
-    for j in (0...a.size)
+    for j in (0...b[0].size)
       c[i][j] = a[i][j] + b[i][j]
+    end
+  end
+  c
+end
+
+def subtract_matrices(a,b)
+  c = Array.new(a.size){Array.new(a[0].size){0}}
+  for i in (0...a.size)
+    for j in (0...b[0].size)
+      c[i][j] = a[i][j] - b[i][j]
     end
   end
   c
@@ -101,21 +157,15 @@ def matrix_assemble(matrices_array)#helper method
   new_matrix
 end
 
-
-a = [[0, 3, 5],
-     [5, 5, 2]]
-b = [[3, 4],
-     [3, -2],
-     [4, -2]]
-c = [[1,1,1,1],
+a = [[1,1,1,1],
      [2,1,2,1],
      [1,2,1,2],
      [2,2,2,2]]
-d = [[0,4],
+b = [[0,4],
      [5,2]]
-e = [[2,5],
+c = [[2,5],
      [3,0]]
 
-x = square_matrix(c,c)
+x = strassen_matrix_multiplication(a,a)
 x.each {|i| puts i.inspect}  
 
