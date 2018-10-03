@@ -1,34 +1,28 @@
-def subtract_matrices(a,b)
-  c = Array.new(a.size){Array.new(a[0].size){0}}
-  for i in (0...a.size)
-    for j in (0...b[0].size)
-      c[i][j] = a[i][j] - b[i][j]
-    end
+def fib(n)
+  return n if n < 2
+  r = [[1,1],[1,0]]
+  r = power(r, n - 1)
+  r[0][0]
+end
+def matrix_multiply(a,b) #helper method
+  c = Array.new(a.size){Array.new(b[0].size){0}}
+  c[0][0] = (a[0][0] * b[0][0]) + (a[0][1] * b[1][0])
+  c[0][1] = (a[0][0] * b[0][1]) + (a[0][1] * b[1][1])
+  c[1][0] = (a[1][0] * b[0][0]) + (a[1][1] * b[1][0])
+  c[1][1] = (a[1][0] * b[0][1]) + (a[1][1] * b[1][1])
+  c 
+end
+
+def power(m, n)
+  d = [[1,1],[1,0]]
+  return m if n == 1
+  r = power(m, n/2)
+  r = matrix_multiply(r,r)
+  if n % 2 != 0
+    r = matrix_multiply(r, d)
   end
-  c
+  r
 end
 
-def cut_matrix(x)#helper method
-  #slice bigger matrix on 4 smaller ones(4x4, in four 2x2)
-  mid = x.size / 2
-  a11 = x.slice(0, mid).map {|i| i.slice(0, mid)}
-  a12 = x.slice(0, mid).map {|i| i.slice(mid, x[0].size - 1)}
-  a21 = x.slice(mid, x.size - 1).map {|i| i.slice(0, mid)}
-  a22 = x.slice(mid, x.size - 1).map {|i| i.slice(mid, x[0].size - 1)}
-  {
-    :x11 => a11, #top left part
-    :x12 => a12, #top right part
-    :x21 => a21, #bottom left part
-    :x22 => a22  #bottom right part
-  }
-end
-
-x = [[1,1,1,1],
-     [2,1,2,1],
-     [1,2,1,2],
-     [2,2,2,2]]
-
-#subtract_matrices(x,x).each{|i| p i.inspect}
-z4 = subtract_matrices(cut_matrix(x)[:x12], cut_matrix(x)[:x22])
-p z4
+puts fib(9)
 

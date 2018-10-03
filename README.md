@@ -52,3 +52,28 @@ Learn more on [wikipedia](https://en.wikipedia.org/wiki/Matrix_multiplication_al
 The Strassen algorithm is using 7 multiplications instead of 8. 
 The complexity of Strassen’s matrix multiplication algorithm is O(nlog7). 
 Learn more on [wikipedia](https://en.wikipedia.org/wiki/Strassen_algorithm).
+
+Great explanation from [Abdul Bari](https://www.youtube.com/watch?v=0oJyNmEbS4w).
+
+## Fibonacci Number in Sequence
+Fibonacci numbers are the numbers in the following integer sequence, called the Fibonacci sequence, and characterized by the fact that every number after the first two is the sum of the two preceding ones: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, ....
+
+1. Iterativ algorithm
+Instead of storing values in an array, we can simply use two variables. This requires some swapping around of values so that everything stays in the appropriate places.
+Iterativ algorithm has time complexity of O(n).
+2. Recursive algorithm
+Direct recursive implementation mathematical recurrence of general formula: F(n) = F(n-1) + F(n-2), has time complexity T(n) = T(n-1) + T(n-2), exponential.
+3. Dynamic algorithm
+This is an iterative algorithm (one that uses loops instead of recursion) so we analyze it a little differently than we would a recursive algorithm. Basically, we just have to compute for each line, how many times that line is executed, by looking at which loops it's in and how many times each loop is executed. Time complexity of O(n).
+4. Matrix algorithm
+Algorithm initializes a matrix M to the identity matrix (the "zeroth power" of A) and then repeatedly multiplies M by A to form the (n-1)st power. Then by the formula above, the top left corner holds F(n), the value we want to return. Time complexity of O(n).
+5. Matrix recursive algorithm
+Basically all the time is in helper method matrix_power(), which is recursive: it tries to compute the nth power of A by squaring the (n/2)th power. However if n is odd, rounding down n/2 and squaring that power of A results in the (n-1)st power, which we "fix up" by multiplying one more factor of A. Time complexity of O(logN).
+
+Learn more on [wikipedia](https://en.wikipedia.org/wiki/Fibonacci_number).
+Learn more on [Geeks-for-Geeks](https://www.geeksforgeeks.org/program-for-nth-fibonacci-number/).
+Learn more on [UCI](https://www.ics.uci.edu/~eppstein/161/960109.html).
+Learn more on [Tutorials Point](https://www.tutorialspoint.com/data_structures_algorithms/fibonacci_series.htm).
+Learn more on [programming interviews](http://tech-queries.blogspot.com/2010/09/nth-fibbonacci-number-in-ologn.html). 
+
+## Peek finding algorithm

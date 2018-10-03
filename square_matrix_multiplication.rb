@@ -61,7 +61,7 @@ def strassen_matrix_multiplication(a,b)
     c[1][0] = x2 + x4
     c[1][1] = x1 + x3 - x2 + x6
   else #case mtrices are bigger then 2*2, 7 recursion calles are needed to calculte result matrix
-    #repet if statement but with matrix opetations instead of scalar
+    #in else statement repet if statement but with matrix opetations instead of scalar
     m1 = strassen_matrix_multiplication(add_matrices(cut_matrix(a)[:x11], cut_matrix(a)[:x22]),
         add_matrices(cut_matrix(b)[:x11], cut_matrix(b)[:x22]))
     m2 = strassen_matrix_multiplication(add_matrices(cut_matrix(a)[:x21], cut_matrix(a)[:x22]),
@@ -128,7 +128,7 @@ def add_matrices(a,b)#helper method
   c
 end
 
-def subtract_matrices(a,b)
+def subtract_matrices(a,b) #helper method, used in strassen algorithm
   c = Array.new(a.size){Array.new(a[0].size){0}}
   for i in (0...a.size)
     for j in (0...b[0].size)
