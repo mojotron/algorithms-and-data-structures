@@ -1,317 +1,345 @@
 class LinkedList
-
-  class Node #helper class, node has to variables
+  #linked list needs halper class that represets elements
+  class Node #single element in LL is node
     attr_accessor :value, :link
-    def initialize(value)
-      @value = value #for storing value of data
-      @link = nil #for storing link to the next node in the list
+    def initialize(value) #node has 2 variables
+      @value = value #to contain value (data)
+      @link = nil #ant link to next element in LL
     end
   end
-
-  attr_accessor :head, :list_size
-  def initialize #Linked list class is initialized with head node, and size of list
-    @head = nil #until element is added head is nil
-    @list_size = 0 #and size is 0
+  #when LL is created its empty
+  attr_accessor :head
+  def initialize() 
+    @head = nil #head variable is pointer, it's point to first element in the LL
   end
-
-  def to_s()
-    string = ''
-    temp_node = @head
-    until temp_node == nil
-      string += "#{temp_node.value} -> "
-      temp_node = temp_node.link
-    end
-    puts string + 'nil'
-  end
-
-  def push(value) #add node at the end of the Linked List
-    new_node = Node.new(value)
-    #first check if linked list has any elements
-    if @head == nil #if head is nil linked list has no elements
-      @head = new_node #in that case @head is new node
-      @list_size += 1 #node is created, add 1 to linked list size
-      return #exit method, its done
-    end
-    #in case linked list is not empty, we must find first link with value nil (last element)
-    temp_node = @head #to not mess up head, we are using temp variable vith head node
-    until temp_node.link == nil #traversing until first nil link
-      temp_node = temp_node.link #iterator, going from node to node via link
-    end
-    temp_node.link = new_node #when we are at last node, assigh its link to new_node
-    @list_size += 1 #node is created, add 1 to linked list size
-  end
-
-  def unshift(value) #add element at the beginning ot the Linked List
-    temp_head = Node.new(value) #create new node as temp head node, this will we new head node
-    temp_head.link = @head #before that, head must be reassign to new head link variable
-    @head = temp_head #only after that, we can sat new node to head
-    @list_size += 1 #node is created, add 1 to linked list size
-  end
-
-  def insert_at(value, position)#add element at targeted position, this is where list_size is powerfull
-    #first case, Linked list is empty or we want to add ellemet at first position (index 0)
-    #we are going to use unshift method to add element
-    return self.unshift(value) if (@list_size == 0) || (position == 0)
-    #second case position is equal or greater to list size
-    #we are going to use push method to add element 
-    return self.push(value) if position >= @list_size
-    #third case, adding node in beatween 2 existing nodes
-    counter = 1 #start counting from first element, we inserting node before element at position
-    #if counter is 0 insertion would be after element at position 
-    #!!! in case we need insert_after, insert before methods for some reason
-    temp_node = @head #strat traversing from first elemen (head)
-    until counter == position #stop loop when counter is equal to position
-      counter += 1
-      temp_node = temp_node.link #looping path is via link variable
-    end
-    new_node = Node.new(value) #create new node
-    new_node.link = temp_node.link #first take over link from temp node
-    temp_node.link = new_node #then conecct temp node link to new node
-    @list_size += 1
-  end
-  
-  def pop() #delete last element from Linked list 
-    if @list_size == 1
-      @head = nil 
-      @list_size = 0
-      return
-    end
-
-    temp_node = @head
-    counter = 2 #counter starts from 2 because we changing temp link(next node)to nil *
-    until counter == @list_size 
-      counter += 1
-      temp_node = temp_node.link
-    end
-    temp_node.link = nil #*
-    @list_size -= 1
-  end
-
-  def shift() #delete first element from Linked list
-    @head = @head.link #just bypass head value
-    (@head == nil) ? @list_size = 0 : @list_size -= 1
-  end
-
-  def delete_at(position) ##add element at targeted position
-    return self.shift() if @list_size == 1 || position == 0
-    return self.pop() if position >= @list_size 
-    temp_node = @head
-    counter = 1 #stats from 1 because we bypassing mid element
-    until counter == position
-      counter += 1
-      temp_node = temp_node.link
-    end      
-    temp_node.link = temp_node.link.link
-    @list_size -= 1
-  end
-
-  def value_at(position)
-    return 'out of range' if position > @list_size || position < 0
-    temp_node = @head
+  #list size, helpfull in element deletion and insertion
+  def list_size()
     counter = 0
-    until counter == position
+    temp_node = @head #start traversting from first elemnt
+    until temp_node == nil #stop when reach end of list
+      temp_node = temp_node.link #step though list with link variable
       counter += 1
-      temp_node = temp_node.link
     end
-    temp_node
+    counter
+  end
+  #adding elements to LL
+  def push(value) #adding element at the end of LL
+    new_node = Node.new(value) #create new node
+    return @head = new_node if @head == nil #if head is nil(list is empty) new node becomes head
+    #if list is not empty, we must traverse to last element in the list 
+    temp_node = @head #starting from the head
+    until temp_node.link == nil #last element in the list is element whit link pointing to nil
+      temp_node = temp_node.link #traversing through list using link variable
+    end
+    temp_node.link = new_node #to append node we assign new node ad last nodes link variable
   end
 
-  def contains?(value)
+  def unshift(value) #adding element at the beginning of LL
+    temp_head = Node.new(value) #create new node as teporarly head
+    temp_head.link = @head #assing current head to temp head link, now temp link has all elements connected
+    @head = temp_head #temp head is now current head
+  end
+
+  def insert_at(value, index) #adding element at nth position of LL
+    #first case LL is empty or inserting at 0 position, use unshift method
+    return unshift(value) if @head == nil || index == 0
+    #second case index == size => points to last element, use push method 
+    #(NOTE: if index is greater then size, inserting will be executed and element will be added)
+    return push(value) if self.list_size() <= index
+    #last case if index points somewhere between frist and last element
+    counter = 1 #start counting from 1 (to insert node before element on nth position
+    #(to insert node after element on nth position change counter to 0 initiali))
     temp_node = @head
+    until counter == index #traverse through list from head until we reach condition
+      temp_node = temp_node.link
+      counter += 1
+    end
+    new_node = Node.new(value) #first create new node
+    new_node.link = temp_node.link #second take link from temp node and assign it to new node link
+    temp_node.link = new_node #last link temp node to new node
+  end
+  #deleting elements to LL
+  def pop() #delete last element in the LL
+    return nil if @head == nil #if list is empty return nil
+    return @head = nil if self.list_size == 1 #list has 1 element(head) assign head to nil
+    temp_node = @head #if list has more then 1 element, travres till last element
+    #stop conditon is when second element from current link to nil, means that first
+    #from current is last element in the list
+    until temp_node.link.link == nil 
+      temp_node = temp_node.link
+    end
+    temp_node.link = nil #cat the link with last element by assigning previous link to nil
+  end
+
+  def shift() #delete first element in the LL
+    @head = @head.link #reasign head to heads link, cuts of heads value
+  end
+
+  def delete_at(index) #delete element at nth position in the LL
+    list_size = self.list_size()
+    return nil if (list_size) < index #***
+    #first case, list is empty or deleting first element(using shift method)
+    return self.shift() if list_size == 1 || index == 0
+    #second case, index == list size => delete last element(useing pop method)
+    #(NOTE: if index is greater then list size deleting will not be executed, 
+    #last element will not be deleted)***
+    return self.pop() if (list_size - 1) == index 
+    #last case if index points somewhere between frist and last element
+    counter = 1
+    temp_node = @head #traverse from head till position of element we want to delete
+    until counter == index
+      temp_node = temp_node.link
+      counter += 1
+    end
+    #cut of element by bypassing link to previous element link to next element in list
+    temp_node.link = temp_node.link.link 
+  end
+  #string representation of LL
+  def to_s() #classical with traversing
+    string = '' #string container
+    temp_node = @head #traversing start
+    until temp_node == nil #traversing until last element
+      #update string container with intepolation of element value and arrow pointin next element
+      string += "#{temp_node.value} -> " 
+      temp_node = temp_node.link
+    end
+    puts string + 'nil' #last element in LL is nil, if list is empty only nil is printed
+  end
+
+  def print_recursive(list = @head) #print elements using recursion
+    #returns same output as to_s method
+    if list == nil #base case
+      puts 'nil' #base case reached, puts nil ass last link
+      return #exit, there is no opetations in stack memory
+    end
+    print "#{list.value} -> " #print before recursive call, before funtion go to stack
+    print_recursive(list.link) #call, itself until link == nil   
+  end
+
+  def print_reverse_recursive(list = @head) #print elements using recursion in reverse order
+    #returns elements in reversto print with last elemet nil adn new line
+    #call with Karnel p function like "p list.print_reverse_recursive()"
+    if list == nil
+      return #entering stack memory
+    end 
+    print_reverse_recursive(list.link)
+    print "#{list.value} -> "#print after recursive call, LIFO
+  end
+  #searching for element 
+  def search(value) #returns node with corenspondig data, nil if not found
+    return nil if @head == nil 
+    temp_node = @head #traverse throuhg list starting from head
     until temp_node == nil
+      #if searched value == current node(temp) value, return node
+      return temp_node if temp_node.value == value 
+      temp_node = temp_node.link
+    end
+    nil #nil if traversing rach end and value did not found
+  end
+
+  def contains?(value) #return true / false if data(value) is in thr list
+    return false if @head == nil #diff between search method is contais return true/false
+    temp_node = @head #traverse throuhg list starting from head
+    until temp_node == nil
+      #if searched value == current node(temp) value, return true
       return true if temp_node.value == value
       temp_node = temp_node.link
     end
-    false
+    false #false if traversing rach end and value did not found
   end
 
-  def find_position(value)
-    temp_node = @head
+  def value_at(index) #return corenspondig data at given index of the list
+    list_size = self.list_size()
+    #return nil if list is empty or index is bigger then list size
+    return nil if list_size == 0 || index >= list_size
     counter = 0
-    until temp_node == nil
-      return counter if temp_node.value == value 
+    temp_node = @head #traverse from head until element at position(index)
+    until counter == index
       temp_node = temp_node.link
       counter += 1
     end
-    nil
+    temp_node.value #return value of corensponding element
   end
 
-  def reverse() #iteration way, swap links with help of 3 temp variables
-    temp_node = @head #main iterating variable
-    prev_node = nil #
-    until temp_node == nil 
-      next_node = temp_node.link #first, save value of next node
-      temp_node.link = prev_node #link temp(current)node with previous instead of next node
-      prev_node = temp_node #previous node becomes current node
-      temp_node = next_node #and current node becomes next node so iteration dont break
-    end
-    @head = prev_node #last step is to reassign last previous node to head variable
-  end
-
-  def reverse_recursive(node = @head)
-    if node.link == nil
-      @head = node
-      return
-    end
-    reverse_recursive(node.link)
-    #temp is next node, this is in stack memory so this is previous node in original LL
-    temp_node = node.link 
-    temp_node.link = node #build link
-    node.link = nil #cut link
-  end
-
-  def recursive_print(node = @head)
-    return if node == nil 
-    puts node.value
-    recursive_print(node.link)
-  end
-
-  def reverse_recursive_print(node = @head)
-    return if node == nil    
-    reverse_recursive_print(node.link)
-    puts node.value
-  end
-
-  def bubble_sort(temp_node = @head)
+  def index_of(value) #returns corensopnding index of given data of the list
+    counter = 0 #loop counter
+    temp_node = @head #start traversing from head
     until temp_node == nil
-      swap = false
+      #if value found return counter which is index of searched value
+      return counter if temp_node.value == value
+      temp_node = temp_node.link
+      counter += 1 #increment counter if not found
+    end
+    nil #nil if traversing rach end and value did not found
+  end
+  #reversing LL
+  def reverse_list() #reverse list with iteration
+    return nil if @head == nil
+    temp_node = @head
+    prev_node = nil #to reverse list, we need last value in LL which is nil
+    until temp_node == nil
+      #first take over link from temp node and save it in next node variable
+      next_node = temp_node.link 
+      #next, break link current from temp element and link it to previosu node
+      #now, current first element is last element
+      temp_node.link = prev_node  
+      #next, move previous pointer 1 elemet
+      prev_node = temp_node
+      #last, next node is current node we traverse
+      temp_node = next_node
+    end
+    #after reconnection of links, reasign @head 
+    @head = prev_node #we need head to travers the list, this is very important
+  end
+
+  def reverse_list_recursive(list = @head) #reverse list using recursion
+    #base case, when we travers to last element, reasign it to @head, last elemet is first now
+    return @head = list if list.link == nil
+    #call recursion with next element, until we get last
+    reverse_list_recursive(list.link)
+    #temp is next node, this is in stack memory so this is previous node in original LL
+    temp_node = list.link
+    #next reverse link
+    temp_node.link = list
+    #cut the link in original list and link to last element in LL (nil)
+    list.link = nil
+  end
+  #sorting elements
+  def bubble_sort() #sorting in average complexity of О(n2)
+    #using bubble sort, its natural choice because linked list go from left to right
+    temp_node = @head
+    
+    until temp_node == nil 
       next_node = temp_node.link
-      until next_node == nil
+      until next_node == nil 
         if temp_node.value > next_node.value
-          temp_node.value, next_node.value = next_node.value, temp_node.value
-          swap = true
+          #swap variable if current node(pointer -> temp node) in outer loop is greater then
+          #current node in inner(poinrt -> next_node) loop
+          swap_variable = temp_node.value
+          temp_node.value = next_node.value 
+          next_node.value = swap_variable
         end
         next_node = next_node.link
-      end
-      break if swap == false
+      end     
       temp_node = temp_node.link
     end
   end
 
-  def split_list(list = @head)
-    if list == nil || list.link == nil
-      left = list
-      right = nil
-      return
-    end
-    slow_pointer = list
-    fast_pointer = list.link
-    while fast_pointer != nil
-      fast_pointer = fast_pointer.link
-      if fast_pointer != nil
-        slow_pointer = slow_pointer.link
-        fast_pointer = fast_pointer.link
-      end
-    end
-    left = list
-    right = slow_pointer.link
-    slow_pointer.link = nil
-    [left, right] 
-  end
-
-  def merge_lists(left, right)
-    dummy_node = Node.new(0)
-    current_node = dummy_node
-    while left != nil && right != nil
-      if left.value <= right.value
-        current_node.link = left
-        left = left.link
-      else
-        current_node.link = right
-        right = right.link
-      end
-      current_node = current_node.link
-    end
-    current_node.link = (left == nil) ? right : left
-    dummy_node.link
-  end
-
   def merge_sort(list = @head)
-    if list == nil || list.link == nil
-      return list
-    end
-    left, right = split_list(list)
-    x = merge_sort(left)
-    y = merge_sort(right)
-    merge_lists(x,y) #!!!!
+    #base case return element when list is of size 1
+    return list if list == nil || list.link == nil
+    #else, split list in 2 parts
+    left_part, right_part = divide_list(list)
+    #for separate part call recursive method untill base case is accompished
+    left = merge_sort(left_part)
+    right = merge_sort(right_part)
+    #after all recursion calls are done, reassemble list from stack memory
+    @head = merge_sorted_lists(left, right)
+    #@head assigment is needed beacuse divide_list method has changed @head 
   end
 
-  def binary_search(value, list = @head)
-    
-  end
-
-  def list_middle(list = @head)#same operations as split, but because better readability i'll break DRY
+  def divide_list(list = @head)
+    #in case list is empty or has 1 element
     if list == nil || list.link == nil
-      return list
+      left = list #left part of the list is @head or nil
+      right = nil #right part in both cases is nil
+      return [left, right] #return array containg both parts
     end
-    slow_pointer = list
-    fast_pointer = list.link
-    while fast_pointer != nil
-      fast_pointer = fast_pointer.link
-      if fast_pointer != nil
-        slow_pointer = slow_pointer.link
-        fast_pointer = fast_pointer.link
+    #in case LL is greater then 1 element, travers through list with 2 pointers
+    slow_pointer = list #slow is going 1 step
+    fast_pointer = list.link #fast is going 2 steps,starting from second element
+    #fast is 2 times faster, that means when fast is over with traversing,
+    #slow points to middle of the list and marks spot for divideing LL in 2 parts left and right
+    until fast_pointer == nil
+      fast_pointer = fast_pointer.link #fast takes frist step
+      if fast_pointer != nil #if fast is not reach end of LL
+        slow_pointer = slow_pointer.link #slow makes step
+        fast_pointer = fast_pointer.link #fast takes additional step
       end
     end
-    slow_pointer #points to the middle node
+    left = list #left part starts from beginnig of the LL
+    right = slow_pointer.link #right part statrs of the middle(slow_pointer marks middle)
+    slow_pointer.link = nil #last we need to cut of middle so left is not whole LL
+    [left, right] #return array containg both parts
+  end
+
+  def merge_sorted_lists(left, right) #merge together 2 sorted lists
+    #to sort 2 LL we need new node in which we will save result of comparisons
+    #@head node value can be any value, we will take new_node.link as return value
+    new_node = Node.new(0) #we need reference, becasue new node is only temp in stack memory
+    result_node = new_node #reference to new_node
+    #run loop as long as one LL traversal till end
+    while left != nil && right != nil 
+      #comapare value in first elements of LLs
+      if left.value <= right.value #if left element <= right
+        result_node.link = left #link next element in result to left LL
+        left = left.link #move one element foward in left LL
+      else #if left element >= right
+        result_node.link = right #link next element in result to right LL
+        right = right.link #move one element foward in right LL
+      end #after comaprison is over
+      result_node = result_node.link #move one element foward in result LL
+    end 
+    #append list which is not run till end of the list
+    result_node.link = (left == nil) ? right : left
+    #return result from second element, because first element is element from creating new node
+    new_node.link 
+  end
+
+  def delete_dupicate_sorted() 
+    #if list is sorted we only need to travers LL once, O(n) linear time
+    return @head if @head == nil || @head.link == nil
+    temp_node = @head
+    until temp_node.link == nil #traversing til last element with value
+      if temp_node.value == temp_node.link.value
+        #store next node for traversal, in this case not next because we will delete next,
+        #but second form current or next->next
+        next_node = temp_node.link.link
+        #cut of temp_node(current) link
+        temp_node.link = nil
+        #attach in that place next->next node, so we skip 1 node, a cant continue traversal
+        temp_node.link = next_node
+      else
+        #traversal only if deletion accure
+        temp_node = temp_node.link
+      end
+    end
+  end
+
+  def delete_dupicate_unsorted()
+    #using 2 loops, O(n2) time
+    return @head if @head == nil || @head.link == nil
+    temp_node = @head
+    until temp_node == nil
+      next_node = temp_node.link
+      until next_node == nil
+        if temp_node.value == new_node.value
+        next_node = next_node.link
+      end
+      temp_node = temp_node.link
+    end
   end
 end
 
-x = LinkedList.new
-x.push(30)
-x.unshift(25)
-x.insert_at(10, 1)
-x.push(12)
-x.push(15)
-x.to_s()
-x.bubble_sort()
-#x.to_s()
-#x.head = x.merge_sort()
-x.to_s()
-p x.binary_search(150)
+list = LinkedList.new
+list.push('A')
+list.push('B')
+list.push('A')
+list.push('C')
+list.push('C')
+list.push('A')
+list.push('C')
+list.push('A')
+list.push('C')
+list.push('A')
+list.push('A')
+list.to_s()
+list.delete_dupicate_unsorted()
+list.to_s()
 
-=begin
-def merge(left, right)
-    dummy_node = Node.new(0)
-    current_node = dummy_node
-    while left != nil && right != nil
-      if left.value <= right.value
-        current_node.link = left
-        left = left.link
-      else
-        current_node.link = right
-        right = right.link
-      end
-      current_node = current_node.link
-    end
-    current_node.link = (left == nil) ? right : left
-    dummy_node.link
-  end
 
-  def split_up_list(temp_node = @head.clone)
-    node = temp_node
-    return node if node == nil
-    slow = node
-    fast = node
-    while fast != nil && fast.link != nil
-      fast = fast.link.link
-      slow = slow.link
-    end
-    left = node 
-    right = slow.link 
-    slow.link = nil 
-  end
+#list.reverse_list_recursive()
+#list.to_s()
+#l, r = list.divide_list()
+#p list.merge_sorted_lists(l,r)
 
-   if left == nil
-      return right
-    elsif right == nil
-      return left
-    end
-    result = Node.new(0)
-    if left.value <= right.value
-      result.link = merge_lists(left.link, right)
-    else
-      result.link = merge_lists(left, right.link)
-    end
-    result.list
-=end
