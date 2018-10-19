@@ -299,6 +299,7 @@ class LinkedList
         temp_node.link = nil
         #attach in that place next->next node, so we skip 1 node, a cant continue traversal
         temp_node.link = next_node
+        #basically this 3 steps are -> temp_node.link = temp_node.link.link
       else
         #traversal only if deletion accure
         temp_node = temp_node.link
@@ -311,11 +312,22 @@ class LinkedList
     return @head if @head == nil || @head.link == nil
     temp_node = @head
     until temp_node == nil
-      next_node = temp_node.link
-      until next_node == nil
-        if temp_node.value == new_node.value
-        next_node = next_node.link
+      current_node = temp_node #refrence to temp node
+      until current_node.link == nil
+        #compare value of temp node and next element in inner loop
+        if temp_node.value == current_node.link.value
+          #if elements are same skip next element with linking current to second next
+          current_node.link = current_node.link.link
+          #another implementation:
+          #next_node = current_node.link.link
+          #current_node.link = nil
+          #current_node.link = next_node
+        else
+          #if elements are not same travers one element foward
+          current_node = current_node.link
+        end
       end
+      #after finish inner loop move outer pointer one element
       temp_node = temp_node.link
     end
   end
