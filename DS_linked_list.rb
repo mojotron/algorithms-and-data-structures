@@ -4,7 +4,7 @@ class LinkedList
     attr_accessor :value, :link
     def initialize(value) #node has 2 variables
       @value = value #to contain value (data)
-      @link = nil #ant link to next element in LL
+      @link = nil #and link to next element in LL
     end
   end
   #when LL is created its empty
@@ -134,7 +134,7 @@ class LinkedList
       return temp_node if temp_node.value == value 
       temp_node = temp_node.link
     end
-    nil #nil if traversing rach end and value did not found
+    nil #nil if traversing reach end, and value did not found
   end
 
   def contains?(value) #return true / false if data(value) is in thr list
@@ -145,7 +145,7 @@ class LinkedList
       return true if temp_node.value == value
       temp_node = temp_node.link
     end
-    false #false if traversing rach end and value did not found
+    false #false if traversing reach end, and value did not found
   end
 
   def value_at(index) #return corenspondig data at given index of the list
