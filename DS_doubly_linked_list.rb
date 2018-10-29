@@ -49,7 +49,7 @@ class DoublyLinkedList
 
   def insert_at(value, index) #adding element at nth position of DLL
     #if list is empty we wnat to insert at first place, use unshift method
-    return self.unshift(value) if @head == nil || index == 0
+    return self.unshift(value) if @head == nil || index <= 0
     #use push to append element if index greater then list_size
     return self.push(value) if index >= self.list_size()
     #if index points between 2 elemnts 
