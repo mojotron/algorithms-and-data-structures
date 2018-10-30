@@ -236,7 +236,7 @@ class CircularLinkedList
 
   def bubble_sort() #sorting in average complexity of О(n2)
     #using bubble sort, its natural choice because linked list go from left to right
-    return @head if @head == nil || @head.link == @new_head
+    return @head if @head == nil || @head.link == @head
     outher_node = @head
     #using 2 while do loop so we can check first value before loop condition
     loop do
@@ -255,39 +255,108 @@ class CircularLinkedList
     end
   end
 
-  def merge_sort(list = @head)
+  def circular_in_simple(list = @head)
+    return nil if list == nil
+    if list.link == list
+      list.link = nil
+      return list
+    end
+    temp_node = list
+    loop do
+      temp_node = temp_node.link
+      break if temp_node.link == list
+    end
+    temp_node.link = nil
   end
 
-  def divide_list(list = @head)
+  def simple_in_circular(list = @head)
+    return nil if list == nil
+    if list.link == nil
+      list.link = list
+      return list
+    end
+    temp_node = list
+    until temp_node.link == nil
+      temp_node = temp_node.link
+    end
+    temp_node.link = list
+    list
   end
 
-  def merge_sorted_lists(left, right)
+  def to_s_simple() #chelper class for circular_in_simple to check if transition is ok
+    string = '' 
+    temp_node = @head 
+    until temp_node == nil 
+      string += "#{temp_node.value} -> " 
+      temp_node = temp_node.link
+    end
+    puts string + 'nil' 
+  end
+
+  def divide_list(list = @head)  
+  end
+
+  def merge_sorted_lists(left, right) 
+  end
+
+  def merge_sort(list = @head) 
   end
 
   def delete_dupicate_sorted()
+    return @head if @head == nil || @head.link == @head
+    temp_node = @head
+    loop do
+      #first break condition is for case if all elements in CLL are same
+      break if temp_node.link == temp_node
+      #if current element and next are the same bypass it with second next
+      if temp_node.value == temp_node.link.value
+        temp_node.link = temp_node.link.link
+      else
+      #elements not same, iterate to next element, and check second stop codition
+        temp_node = temp_node.link
+        break if temp_node == @head #traversal have reach end of the list
+      end
+    end
   end
 
   def delete_dupicate_unsorted()
+    return @head if @head == nil || @head.link == @head
+    temp_node = @head
+    loop do
+      current_node = temp_node
+      loop do
+        #break before entering infinit loop(enter is by jumping over head node)
+        break if current_node.link == @head
+        if temp_node.value == current_node.link.value
+          #if next element is same as current skip it with bypass link to next element to it
+          current_node.link = current_node.link.link
+        else
+          current_node = current_node.link
+          break if current_node == @head
+        end
+      end
+      temp_node = temp_node.link
+      break if temp_node == @head
+    end
   end
 
 end
 
 list = CircularLinkedList.new()
-list.push('A')
 list.push('B')
 list.push('A')
+list.push('E')
+list.push('D')
 list.push('C')
-list.push('B')
-list.push('B')
-list.push('C')
-list.push('A')
-list.push('C')
-list.push('A')
-list.push('C')
-list.push('A')
-list.push('A')
 list.to_s()
-list.bubble_sort()
+list.circular_in_simple()
+list.to_s_simple()
+list.simple_in_circular()
 list.to_s()
-list.reverse_list()
-list.to_s()
+
+
+
+
+
+
+#p list.merge_sorted_lists(left, right)
