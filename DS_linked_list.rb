@@ -234,7 +234,7 @@ class LinkedList
     left = merge_sort(left_part)
     right = merge_sort(right_part)
     #after all recursion calls are done, reassemble list from stack memory
-    @head = merge_sorted_lists(left, right)
+    list = merge_sorted_lists(left, right)
     #@head assigment is needed beacuse divide_list method has changed @head 
   end
 
@@ -346,7 +346,7 @@ list.push('C')
 list.push('A')
 list.push('A')
 list.to_s()
-list.delete_dupicate_unsorted()
+list.merge_sort()
 list.to_s()
 
 

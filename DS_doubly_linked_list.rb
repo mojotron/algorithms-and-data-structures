@@ -256,7 +256,7 @@ class DoublyLinkedList
     left_part, right_part = divide_list(list) #dived list
     left = merge_sort(left_part) #divide left part ot the listuntil base case
     right = merge_sort(right_part) #divide right of the list part until base case
-    @head = merge_sorted_lists(left, right) #last, combain results and asign to head
+    list = merge_sorted_lists(left, right) #last, combain results and asign to head
   end
   
   def divide_list(list = @head)

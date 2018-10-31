@@ -230,10 +230,7 @@ class CircularLinkedList
     @head.link = prev_node #after swaping links, finish circle by attaching head to last element
     @head = prev_node #make last element first element
   end
-
-  def reverse_list_recursive()
-  end
-
+  #sorting values of elements
   def bubble_sort() #sorting in average complexity of О(n2)
     #using bubble sort, its natural choice because linked list go from left to right
     return @head if @head == nil || @head.link == @head
@@ -254,28 +251,29 @@ class CircularLinkedList
       break if outher_node == @head
     end
   end
-
-  def circular_in_simple(list = @head)
-    return nil if list == nil
-    if list.link == list
-      list.link = nil
+  #additional operations on CLL
+  def circular_in_simple(list = @head) #transform CLL in LL
+    return nil if list == nil #first, case list is empty
+    if list.link == list #second case, list has 1 element
+      list.link = nil #last element in LL points to nil
       return list
     end
-    temp_node = list
-    loop do
+    temp_node = list #third case, list has more then 1 element
+    loop do #traversal until loop reach last element and link it to nil
       temp_node = temp_node.link
       break if temp_node.link == list
     end
     temp_node.link = nil
+    list
   end
 
-  def simple_in_circular(list = @head)
-    return nil if list == nil
-    if list.link == nil
-      list.link = list
+  def simple_in_circular(list = @head) #transform LL in CLL
+    return nil if list == nil #first, case list is empty
+    if list.link == nil #second case, list has 1 element
+      list.link = list #last element in CLL points to first element (head)
       return list
     end
-    temp_node = list
+    temp_node = list #traversal until loop reach last element and link it to head
     until temp_node.link == nil
       temp_node = temp_node.link
     end
@@ -283,8 +281,8 @@ class CircularLinkedList
     list
   end
 
-  def to_s_simple() #chelper class for circular_in_simple to check if transition is ok
-    string = '' 
+  def to_s_simple() #string representation LL, if there is transformation CLL in LL
+    string = ''  
     temp_node = @head 
     until temp_node == nil 
       string += "#{temp_node.value} -> " 
@@ -293,13 +291,60 @@ class CircularLinkedList
     puts string + 'nil' 
   end
 
-  def divide_list(list = @head)  
+  def divide_list(list = @head)
+    if list == nil || list.link == nil
+      left = list
+      right = nil
+      return [left, right]
+    end 
+    #find middle of the list using slow and fast pointer
+    slow_pointer = list
+    fast_pointer = list
+    loop do
+      fast_pointer = fast_pointer.link
+      if fast_pointer != list
+        slow_pointer = slow_pointer.link
+        fast_pointer = fast_pointer.link
+      end
+      break if fast_pointer.link == list
+    end
+    #save last element in the original list, we need to link it to right part head 
+    #to close cirle and make CLL ***
+    temp_node = list
+    until temp_node.link == list
+      temp_node = temp_node.link
+    end
+    #make 2 CLL by spliting up original CLL
+    left = list
+    right = slow_pointer.link
+    slow_pointer.link = left
+    temp_node.link = right #*** now we use saved last element of original list, making circle
+    #we are returning non circular list for faster merging
+    [left, right]
   end
 
   def merge_sorted_lists(left, right) 
-  end
-
-  def merge_sort(list = @head) 
+    #approch where compating lists are first turned in simple LL
+    left = circular_in_simple(left)
+    right = circular_in_simple(right)
+    new_node = Node.new(0)
+    result_node = new_node
+    while left != nil && right != nil 
+      #comapare value in first elements of LLs
+      if left.value <= right.value #if left element <= right
+        result_node.link = left #link next element in result to left LL
+        left = left.link #move one element foward in left LL
+      else #if left element >= right
+        result_node.link = right #link next element in result to right LL
+        right = right.link #move one element foward in right LL
+      end #after comaprison is over
+      result_node = result_node.link #move one element foward in result LL
+    end 
+    #append list which is not run till end of the list
+    result_node.link = (left == nil) ? right : left
+    #return result from second element, because first element is element from creating new node
+    #but first make list circular again
+    new_node.link = simple_in_circular(new_node.link) 
   end
 
   def delete_dupicate_sorted()
@@ -349,14 +394,10 @@ list.push('E')
 list.push('D')
 list.push('C')
 list.to_s()
-list.circular_in_simple()
-list.to_s_simple()
-list.simple_in_circular()
+list.bubble_sort()
+list.to_s()
+list.reverse_list()
+list.to_s()
+list.reverse_list_recursive()
 list.to_s()
 
-
-
-
-
-
-#p list.merge_sorted_lists(left, right)
