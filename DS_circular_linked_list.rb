@@ -398,6 +398,5 @@ list.bubble_sort()
 list.to_s()
 list.reverse_list()
 list.to_s()
-list.reverse_list_recursive()
-list.to_s()
+
 
