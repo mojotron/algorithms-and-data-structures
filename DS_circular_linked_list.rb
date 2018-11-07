@@ -215,7 +215,7 @@ class CircularLinkedList
     end
     nil
   end 
-
+  #reversing list
   def reverse_list()
     return @head if @head == nil || @head.link == @head
     temp_node = @head
@@ -292,7 +292,7 @@ class CircularLinkedList
   end
 
   def divide_list(list = @head)
-    if list == nil || list.link == nil
+    if list == nil || list.link == list
       left = list
       right = nil
       return [left, right]
@@ -300,13 +300,9 @@ class CircularLinkedList
     #find middle of the list using slow and fast pointer
     slow_pointer = list
     fast_pointer = list
-    loop do
-      fast_pointer = fast_pointer.link
-      if fast_pointer != list
-        slow_pointer = slow_pointer.link
-        fast_pointer = fast_pointer.link
-      end
-      break if fast_pointer.link == list
+    while fast_pointer.link != list && fast_pointer.link.link != list
+      fast_pointer = fast_pointer.link.link
+      slow_pointer = slow_pointer.link
     end
     #save last element in the original list, we need to link it to right part head 
     #to close cirle and make CLL ***
@@ -314,7 +310,9 @@ class CircularLinkedList
     until temp_node.link == list
       temp_node = temp_node.link
     end
-    #make 2 CLL by spliting up original CLL
+    #make 2 CLL by spliting up original CLL but first determin does list have
+    #odd or even number of element, if list have odd number of elements left part list
+    #has 1 more node in 
     left = list
     right = slow_pointer.link
     slow_pointer.link = left
@@ -324,27 +322,55 @@ class CircularLinkedList
   end
 
   def merge_sorted_lists(left, right) 
-    #approch where compating lists are first turned in simple LL
-    left = circular_in_simple(left)
-    right = circular_in_simple(right)
-    new_node = Node.new(0)
-    result_node = new_node
-    while left != nil && right != nil 
-      #comapare value in first elements of LLs
-      if left.value <= right.value #if left element <= right
-        result_node.link = left #link next element in result to left LL
-        left = left.link #move one element foward in left LL
-      else #if left element >= right
-        result_node.link = right #link next element in result to right LL
-        right = right.link #move one element foward in right LL
-      end #after comaprison is over
-      result_node = result_node.link #move one element foward in result LL
-    end 
-    #append list which is not run till end of the list
-    result_node.link = (left == nil) ? right : left
-    #return result from second element, because first element is element from creating new node
-    #but first make list circular again
-    new_node.link = simple_in_circular(new_node.link) 
+    new_node = Node.new(0) #create new node for elements after comparison
+    result_node = new_node #create reference to ne node to keep track of last element
+    left_node = left #referece to first list, for tracking last element
+    right_node = right #reference for second list, for tracking last element
+    loop do #first loop goes until one of the list reach end
+      if left_node.value <= right_node.value #compare values of current element in the list
+        result_node.link = left_node #if left is smaller or equal append left side to the resault
+        left_node = left_node.link #move to next element in the left(first) list
+        result_node = result_node.link #move to the next spot for element in result list
+        break if left_node == left #break condition if left has circuled all elements
+      else #if right element is grater then left, do same but with right_node reference
+        result_node.link = right_node
+        right_node = right_node.link 
+        result_node = result_node.link
+        break if right_node == right #break condition if right has circuled all elements
+      end 
+    end
+    #in this state method is reached last element in ONE list, other has some leftover values
+    loop do #if left part has leftovers then loop over left and attach elements to result node
+      result_node.link = left_node
+      left_node = left_node.link
+      result_node = result_node.link
+      break if left_node == left
+    end
+
+    loop do #if right part has leftovers then loop over right and attach elements to result node
+      result_node.link = right_node
+      right_node = right_node.link 
+      result_node = result_node.link
+      break if right_node == right
+    end
+    #after both list has reach last element, we must complete circle
+    #connect last element in new list, to second element, first is 0 created by Node.new class
+    result_node.link = new_node.link 
+    new_node.link #return new list, without first element
+  end
+
+  def merge_sort(list = @head)
+    #base case return element when list is of size 1
+    return nil if list == nil
+    return list if list.link == list
+    #else, split list in 2 parts
+    left_part, right_part = divide_list(list)
+    #for separate part call recursive method untill base case is accompished
+    left = merge_sort(left_part)
+    right = merge_sort(right_part)
+    #after all recursion calls are done, reassemble list from stack memory
+    @head = merge_sorted_lists(left, right)
+    #@head assigment is needed beacuse divide_list method has changed @head 
   end
 
   def delete_dupicate_sorted()
@@ -352,7 +378,7 @@ class CircularLinkedList
     temp_node = @head
     loop do
       #first break condition is for case if all elements in CLL are same
-      break if temp_node.link == temp_node
+      break if temp_node.link == @head
       #if current element and next are the same bypass it with second next
       if temp_node.value == temp_node.link.value
         temp_node.link = temp_node.link.link
@@ -388,15 +414,25 @@ class CircularLinkedList
 end
 
 list = CircularLinkedList.new()
-list.push('B')
-list.push('A')
-list.push('E')
-list.push('D')
 list.push('C')
+list.push('D')
+list.push('E')
+list.push('A')
+list.push('B')
+list.push('C')
+list.push('D')
+list.push('E')
+list.push('A')
+list.push('B')
 list.to_s()
-list.bubble_sort()
+list.merge_sort()
 list.to_s()
-list.reverse_list()
-list.to_s()
-
+#list.delete_dupicate_sorted()
+#list.reverse_list()
+#list.to_s()
+#left, right = list.divide_list()
+#p left 
+#p right
+#p list.head = list.merge_sorted_lists(left, right)
+#list.to_s()
 

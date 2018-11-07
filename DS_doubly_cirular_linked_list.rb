@@ -198,45 +198,195 @@ class DoublyCircularLinkedList
     puts
   end
 
-  def print_recursive()
+  def print_recursive(start = @head, current = start)
+    return puts "list is empty" if start == nil 
+    print "#{current.value} "
+    current = current.link_next
+    if start != current
+      print_recursive(start, current)
+    else
+      puts
+    end
   end
 
-  def print_recursive_reverse()
+  def print_recursive_reverse(start = @head, current = start)
+    return puts "list is empty" if start == nil
+    current = current.link_prev
+    print "#{current.value} "
+    if start != current
+      print_recursive_reverse(start, current)
+    else
+      puts
+    end
   end
 
   def reverse_list()
+    return @head if @head == nil || @head.link_next == @head
+    temp_node = @head
+    prev_node = nil
+    loop do
+      next_node = temp_node.link_next
+      prev_node = temp_node.link_prev
+      temp_node.link_prev = temp_node.link_next
+      temp_node.link_next = prev_node
+      temp_node = next_node
+      break if temp_node == @head
+    end
+    @head = prev_node.link_prev
   end
 
-  def reverse_list_recursive()
+  def reverse_list_recursive(start = @head, current = start)
+    store_node = current.link_next
+    current.link_next = current.link_prev
+    current.link_prev = store_node
+    current = current.link_prev
+    if start == current
+      return @head = current.link_next
+    else
+      reverse_list_recursive(start, current)
+    end
   end
 
   def insertion_sort()
+    return @head if @head == nil || @head.link_next == @head
+    outher_node = @head.link_next
+    loop do
+      inner_node = outher_node
+      loop do
+        if inner_node.value <= inner_node.link_prev.value
+          store_value = inner_node.value
+          inner_node.value = inner_node.link_prev.value
+          inner_node.link_prev.value = store_value
+        end
+        inner_node = inner_node.link_prev
+        break if inner_node == @head
+      end
+      outher_node = outher_node.link_next
+      break if outher_node == @head
+    end
   end
 
-  def merge_sort()
+  def divide_list(list = @head)
+    if list == nil || list.link_next == list
+      left = list
+      right = nil
+      return [left, right]
+    end
+    slow_pointer = list
+    fast_pointer = list
+    while fast_pointer.link_next != list && fast_pointer.link_next.link_next != list
+      fast_pointer = fast_pointer.link_next.link_next
+      slow_pointer = slow_pointer.link_next
+    end
+    temp_node = list
+    until temp_node.link_next == list
+      temp_node = temp_node.link_next
+    end
+  
+    left = list
+    right = slow_pointer.link_next
+    left.link_prev = slow_pointer
+    slow_pointer.link_next = left
+    right.link_prev = temp_node
+    temp_node.link_next = right
+
+    [left, right]
   end
 
-  def divide_list()
+  def merge_sorted_lists(left, right)
+    new_node = Node.new(0)
+    result_node = new_node
+    left_node = left
+    right_node = right
+    loop do
+      if left_node.value <= right_node.value
+        result_node.link_next = left_node
+        left_node.link_prev = result_node
+        left_node = left_node.link_next
+        result_node = result_node.link_next
+        break if left_node == left
+      else
+        result_node.link_next = right_node
+        right_node.link_prev = result_node
+        right_node = right_node.link_next
+        result_node = result_node.link_next
+        break if right_node == right
+      end
+    end
+    loop do
+      result_node.link_next = left_node
+      left_node.link_prev = result_node
+      left_node = left_node.link_next
+      result_node = result_node.link_next
+      break if left_node == left
+    end
+    loop do 
+      result_node.link_next = right_node
+      right_node.link_prev = result_node
+      right_node = right_node.link_next
+      result_node = result_node.link_next
+      break if right_node == right
+    end
+    result_node.link_next = new_node.link_next
+    new_node.link_next.link_prev = result_node
+    new_node.link_next
   end
 
-  def merge_sorted_lists()
+  def merge_sort(list = @head)
+    return nil if list == nil
+    if list.link_next == list
+      return list
+    else
+      left_part, right_part = divide_list(list)
+      left = merge_sort(left_part)
+      right = merge_sort(right_part)
+      @head = merge_sorted_lists(left, right)
+    end
   end
 
   def delete_dupicate_sorted()
+    return @head if @head == nil || @head.link_next == @head
+    temp_node = @head
+    loop do
+      break if temp_node.link_next == @head
+      if temp_node.value == temp_node.link_next.value
+        temp_node.link_next = temp_node.link_next.link_next
+      else
+        temp_node = temp_node.link_next
+        break if temp_node == @head
+      end
+    end
   end
 
   def delete_dupicate_unsorted()
+    return @head if @head == nil || @head.link_next == @head
+    temp_node = @head
+    loop do
+      current_node = temp_node
+      loop do
+        break if current_node.link_next == @head
+        if temp_node == current_node
+          current_node.link_next = current_node.link_next.link_next
+        else
+          current_node = current_node.link_next
+          break if current_node == @head
+        end
+      end
+      temp_node = temp_node.link_next
+      break if temp_node == @head
+    end
   end
 
 end
 
 list = DoublyCircularLinkedList.new()
-list.push('C')
-list.unshift('A')
-list.insert_at('B',1)
-list.push('D')
 list.push('E')
+list.push('C')
 list.push('F')
+list.push('D')
+list.push('A')
+list.push('B')
+
 list.to_s()
-list.print_from_head()
-list.print_from_tail()
+list.merge_sort()
+list.to_s()

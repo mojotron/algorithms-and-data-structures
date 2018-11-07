@@ -250,6 +250,7 @@ class DoublyLinkedList
   end
 
   def merge_sort(list = @head) #sorting algoritam vith worst case O(n log n) time comlexity
+    return nil if list == nil
     if list.link_next == nil #base case, list size of 1 element
       return list
     end
