@@ -144,7 +144,7 @@ class CircularLinkedList
   end
 
   def print_recursive(start = @head, current = @head) #print elements using recursion
-    #to print with recursion in CLL we need to patameters, start pointer and 
+    #to print with recursion in CLL we need two patameters, start pointer and 
     #current position pointer (same first call, so we can print first element).
     print "#{current.value} -> "
     current = current.link #move pointer to next element in te current list reference

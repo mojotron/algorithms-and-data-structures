@@ -153,8 +153,8 @@ class DoublyCircularLinkedList
 
   def index_of(value)
     return nil if @head == nil
-    temp_node = @head
     counter = 0
+    temp_node = @head
     loop do 
       return counter if temp_node.value == value
       counter += 1
@@ -341,6 +341,7 @@ class DoublyCircularLinkedList
       left = merge_sort(left_part)
       right = merge_sort(right_part)
       @head = merge_sorted_lists(left, right)
+      
     end
   end
 
@@ -388,5 +389,5 @@ list.push('A')
 list.push('B')
 
 list.to_s()
-list.merge_sort()
+list.reverse_list()
 list.to_s()
