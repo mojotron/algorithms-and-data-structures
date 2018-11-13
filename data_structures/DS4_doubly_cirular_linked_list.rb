@@ -415,7 +415,7 @@ class CircularDoublyLinkedList
     end
   end
 end
-#sore better understending read all liked list data structure files :P
+#for better understending read all liked list data structure files :P
 list = CircularDoublyLinkedList.new()
 
 list.push('C')

@@ -333,21 +333,21 @@ class LinkedList
   end
 end
 
-list = LinkedList.new
-list.push('A')
-list.push('B')
-list.push('A')
-list.push('C')
-list.push('C')
-list.push('A')
-list.push('C')
-list.push('A')
-list.push('C')
-list.push('A')
-list.push('A')
-list.to_s()
-list.merge_sort()
-list.to_s()
+#list = LinkedList.new
+#list.push('A')
+#list.push('B')
+#list.push('A')
+#list.push('C')
+#list.push('C')
+#list.push('A')
+#list.push('C')
+#list.push('A')
+#list.push('C')
+#list.push('A')
+#list.push('A')
+#list.to_s()
+#list.merge_sort()
+#list.to_s()
 
 
 #list.reverse_list_recursive()
