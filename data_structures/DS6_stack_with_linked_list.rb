@@ -40,6 +40,11 @@ class Stack #stack implemtation using Linked lists
     @top #top element is first element in the list
   end
 
+  def peek_value()
+    return nil if @top == nil
+    @top.value
+  end
+
   def is_empty?() #boolena check if stack is empty, if top is -1 stack is empty
     (@top == nil) ? true : false
   end
@@ -65,40 +70,5 @@ class Stack #stack implemtation using Linked lists
     counter
   end
 end
-#stack application scenarios
-#1.reverse a string, time complexity and space compexity O(n)
-string = "Linked List"
-new_stack = Stack.new()
-string.each_char do |char|
-  new_stack.push(char)
-end
-string.length.times do |i|
-  string[i] = new_stack.pop()
-end
-#puts string
 
-require_relative "DS1_linked_list.rb"
-#2. reverse Linked List using explicit stack(our Stack class, not computer memeory stack-implicit)
-new_list = LinkedList.new() #create new LL and add 3 elements in it
-new_list.push('A')
-new_list.push('B')
-new_list.push('C')
-
-new_stack = Stack.new() #create new stack, traversal the LL and add elements to stack
-temp_node = new_list.head
-until temp_node == nil
-  new_stack.push(temp_node.value)
-  temp_node = temp_node.link
-end
-
-temp_top = new_stack.peek()
-new_list.head = temp_top
-new_stack.pop()
-until new_stack.is_empty? == true
-  temp_top.link = new_stack.peek()
-  new_stack.pop()
-  temp_top = temp_top.link
-end
-temp_top.link = nil
-new_list.to_s()
 
