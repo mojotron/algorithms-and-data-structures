@@ -121,67 +121,7 @@ def prefix_evaluation(expression)
   end
   local_stack.top()
 end
-#p prefix_evaluation("- + * 2 3 * 5 4 9")
-#infix to postfix
-def operator_precedance(operator)
-  result = nil
-  case operator
-    when "+" then result = 1
-    when "-" then result = 1
-    when "*" then result = 2
-    when "/" then result = 2
-    when "**" then result = 3
-  end
-  result
-end
 
-def compare_precedance?(operator1, operator2)
-  precedance1 = operator_precedance(operator1)
-  precedance2 = operator_precedance(operator2)
-  (precedance1 >= precedance2) ? true : false
-end
-#p compare_precedance?('-','*')
-
-def infix_to_postfix(expression)
-  return nil if expression.class != String
-  opening = ["(", "{", "["] 
-  closing = [")", "}", "]"]
-  digits = ["0", "1", "2", "3", "4", "5","6", "7", "8", "9"]
-  operators = ["+", "-", "*", "/", "**"]
-
-  local_stack = Stack.new()
-  result = String.new()
-    
-  expression.each_char do |char|
-    if digits.include?(char)
-      result += "#{char} "
-    elsif operators.include?(char)
-      while !local_stack.is_empty?() && compare_precedance?(local_stack.top, char) &&
-          opening.include?(local_stack.top())
-        result += "#{local_stack.top()} "
-        local_stack.pop()
-      end
-      local_stack.push(char)
-    elsif opening.include?(char)
-      local_stack.push(char)
-    elsif closing.include?(char)
-      while !local_stack.is_empty?() && closing.include?(local_stack.top())
-        result += "#{local_stack.top()} "
-        local_stack.pop()
-      end
-      local_stack.pop()
-    end
-  end
-
-  while !local_stack.is_empty?()
-    result += "#{local_stack.top()} "
-    local_stack.pop()
-  end
-  result.rstrip
-end
-p infix_to_postfix("2+3")
-p infix_to_postfix("(2+3)*4-(5*6)")
-#infix to prefix
 
 
 
