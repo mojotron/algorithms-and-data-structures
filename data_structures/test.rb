@@ -1,91 +1,74 @@
+require_relative "DS6_stack_with_linked_list.rb"
+
 class Queue
-  attr_accessor :space_limit, :queue, :head, :tail
-  def initialize(space_limit = 10)
-    @space_limit = space_limit
-    @queue = Array.new()
-    @head = -1
-    @tail = -1
+  attr_accessor :first_stack, :second_stack
+  def initialize()
+    @first_stack = Stack.new()
+    @second_stack = Stack.new()
   end
 
   def is_empty?()
-    (@head == -1 && @tail == -1) ? true : false
-  end
-
-  def is_full?()
-    ((@tail + 1) % space_limit == @head) ? true : false
+    (@first_stack.is_empty?()) ? true : false
   end
 
   def enqueue(value)
-    if self.is_full?()
-      return puts "Queue is full!"
-    elsif self.is_empty?()
-      @head = 0
-      @tail = 0
-    else
-      @tail = (@tail + 1) % space_limit
+    if self.is_empty?()
+      @first_stack.push(value)
+      return
     end
-    @queue[@tail] = value
+    until @first_stack.is_empty?()
+      temp_node = @first_stack.pop()
+      @second_stack.push(temp_node)
+    end
+    @second_stack.push(value)
+    until @second_stack.is_empty?()
+      temp_node = @second_stack.pop()
+      @first_stack.push(temp_node)
+    end
   end
 
   def dequeue()
-    value = nil
     if self.is_empty?()
-      puts "Queue is empty!"
-    elsif @head == @tail
-      value = @queue[@head]
-      @head = -1
-      @tail = -1
-    else
-      value = @queue[@head]
-      @head = (@head + 1) % space_limit
+      puts "Queue is empty"
+      return nil
     end
-    value
+    @first_stack.pop()
   end
 
   def peek()
-    return nil if self.is_empty?()
-    @queue[@head]
+    if self.is_empty?()
+      puts "Queue is empty"
+      return nil
+    end
+    @first_stack.peek_value()
   end
 
   def queue_size()
-    return 0 if self.is_empty?()
-    (@head > @tail) ? (space_limit - @head + @tail + 1) : (@tail - @head + 1)
+    @first_stack.stack_size()
   end
 
   def display()
-    return puts "Queue is empty!" if self.is_empty?()
-    container = Array.new()
-    2.times do
-      @queue.each { |item| container << item}
-    end
-
+    temp_node = @first_stack.top 
     print "Out "
-    container[@head, self.queue_size()].each { |item| print "<- [#{item}] " }
-    puts "<- In"
+    until temp_node == nil
+      print "<- [#{temp_node.value}] "
+      temp_node = temp_node.link 
+    end
+    puts "<- Out"
   end
 end
 
-x = Queue.new(5)
+x = Queue.new()
 x.enqueue('A')
 x.enqueue('B')
 x.enqueue('C')
-x.enqueue('D')
-x.enqueue('E')
-puts "Peek is #{x.peek()}" 
 x.display()
-p x.dequeue()
-puts "Peek is #{x.peek()}" 
+x.dequeue()
 x.display()
-p x.dequeue()
-puts "Peek is #{x.peek()}" 
+x.dequeue()
 x.display()
-p x.dequeue()
-puts "Peek is #{x.peek()}" 
-x.display()
-p x.dequeue()
-puts "Peek is #{x.peek()}" 
-x.display()
-p x.dequeue()
-puts "Peek is #{x.peek()}" 
+x.enqueue('X')
+x.enqueue('Y')
 x.display()
 p x.queue_size()
+p x.peek()
