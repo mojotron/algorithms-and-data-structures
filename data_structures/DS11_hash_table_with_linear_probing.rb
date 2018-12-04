@@ -1,105 +1,172 @@
 class HashTable
+
   class Node
-    attr_accessor :key, :value 
+    attr_accessor :key, :value
     def initialize(key, value)
       @key = key
       @value = value
     end
-
-    def to_s()
-     @value
-    end
   end
 
-  attr_accessor :space_limit, :table, :head, :tail
-  def initialize(space_limit = 10)
-    @space_limit = space_limit
-    @table = Array.new(space_limit)
+  attr_accessor :space_limit, :table, :element_count
+  def initialize()
+    @space_limit = 11
+    @table = Array.new(@space_limit, nil)
+    @element_count = 0
   end
 
-  def hashing(key)
-    if key.class == String
-      key = key.sum
-    else
-      puts "Incorrect input, please enter string!"
-      return
+  def hash_generator(key)
+    return nil if key == nil
+    sum_of_char = 0
+
+    key.to_s.each_char do |char|
+      sum_of_char += char.ord
     end
-    key = key % @space_limit
+    sum_of_char % @space_limit
   end
 
-  def linear_probing(hash_code)
-    i = 0
-    while i < @space_limit
-      hash_code = (hash_code + 1) % @space_limit
-      if @table[hash_code] == nil
-        return hash_code
-      end
-      i += 1
+  def display()
+    @table.each_with_index do |node, index|
+      puts "#{index}-> #{(node == nil) ? node : node.value}"
     end
-    nil
   end
 
   def insert(key, value)
     new_node = Node.new(key, value)
-    hash_code = hashing(key)
-    puts "#{key} has hash code: #{hash_code}"
+    hash_code = self.hash_generator(key)
+    
     if @table[hash_code] == nil
       @table[hash_code] = new_node
-    else
-      x = linear_probing(hash_code)
-      if x != nil
-        @table[x] = new_node
-      else
-        puts "table is full"
+      @element_count += 1
+      return
+    else 
+      if @table[hash_code].key == "*deleted-key*"
+        @table[hash_code] = new_node
+        @element_count += 1
         return
+      elsif @table[hash_code].key == key #check if key is olready used, if is change old value with new
+        return @table[hash_code].value = value #replace value
+      else
+        #LINEAR PROBING: search for next empty spot(or used key)
+        start_position = hash_code
+        while @table[hash_code] != nil && @table[hash_code].key != key &&
+          @table[hash_code].key != "*deleted-key*" && (hash_code + 1) % @space_limit != start_position
+          hash_code = (hash_code + 1) % @space_limit #circular array iteration
+        end
+        #loop has reach 1 of 4 stop conditions
+        if @table[hash_code] == nil #if slot in the array is empty add new element to thet slot
+          @table[hash_code] = new_node
+          @element_count += 1
+          return 
+        elsif @table[hash_code].key == "*deleted-key*" #if slot was deleted and hes dummy node, rewrite it
+          @table[hash_code] = new_node
+          @element_count += 1
+          return
+        elsif @table[hash_code].key == key  #if loop has reached element with key already used change old value with new
+          return @table[hash_code].value = value
+        else #if loop has pass all elements in the array
+          puts "Table is full!"
+        end
       end
     end
-  end
-
-  def delete(key)
-    hash_code = hashing(key)
-    x = hash_code
-    while true
-      if @table[hash_code].key == key
-        return @table[hash_code] = nil
-      end
-      hash_code = (hash_code + 1) % @space_limit
-      break if x == hash_code
-    end
-    puts "Element is not in the table"
   end
 
   def search(key)
-    hash_code = hashing(key)
-    x = hash_code
-    while true
+    hash_code = self.hash_generator(key)
+    start_position = hash_code
+    while @table[hash_code] != nil && (hash_code + 1) % @space_limit != start_position
       if @table[hash_code].key == key
+        puts "Key: #{key}, at index: #{hash_code}, has value: #{@table[hash_code].value}."
         return @table[hash_code].value
+      else
+        hash_code = (hash_code + 1) % @space_limit
+      end
+    end
+    puts "Key: #{key}, not found!"
+    nil
+  end
+
+  def delete(key)
+    delete_node = Node.new('*deleted-key*', '*deleted-value*')
+    hash_code = self.hash_generator(key)
+    start_position = hash_code
+    while @table[hash_code] != nil && (hash_code + 1) % @space_limit != start_position
+      if @table[hash_code].key == key
+        value = @table[hash_code].value
+        @table[hash_code] = delete_node
+        @element_count -= 1
+        return value
       end
       hash_code = (hash_code + 1) % @space_limit
-      break if x == hash_code
     end
-    puts "Element is not in the table"
   end
 
-  def display()
-    @table.each_with_index { |element, index| puts "#{index}: #{element.to_s()}"}
+  def is_empty?()
+    (@element_count == 0) ? true : false
   end
 
-end
+  def is_full?()
+    (@element_count == @space_limit) ? true : false
+  end
+
+  def table_size()
+    @element_count
+  end
+
+end  
 
 x = HashTable.new()
-x.insert('Howkeye', ["Clint Barton", "Shield agent. Speciality: bow and arrow, sniper."])
-x.insert('Thor', ["Thor Odinson", "God of tunder, great hair."])
-x.insert('Hulk', ["Bruce Benner", "Transformation is green moster. Smashing time!"])
-x.insert('Capitan America', ["Steve Rogers", "First test subject of super solider serum."])
-x.insert('Iron-man', ["Tony Stark", "Armored and weponized suite."])
-x.insert('Black Widow', ["Natalia Romanova", "Agent of shield. Speciality: super spy."])
-x.insert('Spider-man', ["Peter Parker", "Bitten by radioactiv spider. Super strength and seanse."])
-x.insert('Ant-man', ["Scott Lang", "Body size adaptation."])
-x.insert('Winter Solider', ["Bucky Barnes", "Vibranium arm, guns and knifes combantant."])
-x.insert('Black Panter', ["T'Challa", "Prince of Wakanda"])
-#x.insert('A', ["A A A A"])
+x.insert('Howkeye', "Clint Barton")
+x.insert('Thor', "Thor Odinson")
+x.insert('Hulk', "Bruce Benner")
+x.insert('Capitan America', "Steve Rogers")
+x.insert('Iron-man', "Tony Stark")
+x.insert('Black Widow', "Natalia Romanova")
+x.insert('Spider-man', "Peter Parker")
+x.insert('Ant-man', "Scott Lang")
+x.insert('Winter Solider', "Bucky Barnes")
+x.insert('Black Panter', "T'Challa")
+x.insert('Falcon', 'Sam Wilson')
+x.insert('Scarlet Witch', ' Wanda Maximoff')
+
+x.insert('Hulk', "BRUCE BANNER")
+x.search('Ant-man')
+x.search('Winter Solider')
+x.search('Falcon')
+
+x.delete('Iron-man')
+x.insert('Vision', "Vision stone + ultron")
+
 x.display()
-p x.delete('Spider-mdan')
-x.display()
+p x.table_size()
+p x.is_empty?()
+p x.is_full?()
+
+
+=begin
+x.insert('Howkeye', "Clint Barton")
+x.insert('Thor', "Thor Odinson")
+x.insert('Hulk', "Bruce Benner")
+x.insert('Capitan America', "Steve Rogers")
+x.insert('Iron-man', "Tony Stark")
+x.insert('Black Widow', "Natalia Romanova")
+x.insert('Spider-man', "Peter Parker")
+x.insert('Ant-man', "Scott Lang")
+x.insert('Winter Solider', "Bucky Barnes")
+x.insert('Black Panter', "T'Challa")
+x.insert('Falcon', 'Sam Wilson')
+x.insert('Scarlet Witch', ' Wanda Maximoff')
+
+x.insert('Howkeye', "Clint --- Barton")
+x.insert('Capitan America', "Steve --- Rogers")
+x.insert('Ant-man', "Scott --- Lang")
+x.insert('Scarlet Witch', 'Wanda --- Maximoff')
+x.insert('Thor', "Thor --- Odinson")
+x.insert('Iron-man', "Tony --- Stark")
+x.insert('Spider-man', "Peter --- Parker")
+x.insert('Winter Solider', "Bucky --- Barnes")
+x.insert('Black Panter', "T'Challa --- ---")
+x.insert('Black Widow', "Natalia --- Romanova")
+x.insert('Hulk', "Bruce --- Benner")
+x.insert('Falcon', 'Sam --- Wilson')
+=end
