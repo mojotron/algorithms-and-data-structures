@@ -121,6 +121,8 @@ class HashTable
       end
       temp_node = temp_node.link
     end
+    puts "Key #{key} not found!"
+    nil
   end
 
   def table_size()
@@ -130,6 +132,7 @@ class HashTable
   def is_empty?()
     (@element_count == 0) ? true : false
   end
+  
 end
 
 x = HashTable.new()
@@ -159,3 +162,4 @@ x.insert('Vision', "Vision stone + ultron".upcase)
 x.table_display()
 p x.table_size()
 p x.is_empty?()
+x.delete('yomba')
