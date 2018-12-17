@@ -1,156 +1,200 @@
-class HashTable
+class BinarySearcTree
   class Node
-    attr_accessor :key, :value, :link
-    def initialize(key, value)
-      @key = key
+    attr_accessor :value, :left, :right
+    def initialize(value)
       @value = value
-      @link = nil
+      @left = nil
+      @right = nil
     end
   end
 
-  class LinkedList
-    attr_accessor :head
-    def initialize()
-      @head = nil
-    end
-
-    def display_list()
-      container = String.new()
-      temp_node = @head
-      until temp_node == nil
-        container += "#{temp_node.value} -> "
-        temp_node = temp_node.link
-      end
-      container + "nil"
-    end
-  end
-
-  attr_accessor :space_limit, :table, :element_count
+  attr_accessor :root
   def initialize()
-    @space_limit = 11
-    @table = Array.new(@space_limit).map { |slot| slot = LinkedList.new() }
-    @element_count = 0
+    @root = nil
   end
 
-  def display_table()
-    @table.each_with_index { |list, index| puts "#{index}: #{list.display_list()}"}
-  end
-
-  def hash_generator(key)
-    return nil if key == nil
-    sum_of_char = 0
-    key.to_s.each_char { |char| sum_of_char += char.ord}
-    sum_of_char % @space_limit
-  end
-
-  def insert(key, value)
-    new_node = Node.new(key, value)
-    hash_code = self.hash_generator(key)
-
-    if @table[hash_code].head == nil
-      @table[hash_code].head = new_node
-      @element_count += 1
+  def loop_insert(value)
+    new_node = Node.new(value)
+    if @root == nil
+      @root = new_node
       return
-    else 
-      temp_node = @table[hash_code].head
-      until temp_node == nil
-        if temp_node.key == key
-          temp_node.value = value
+    end
+    temp_node = @root
+    while true
+      if value <= temp_node.value
+        if temp_node.left == nil
+          temp_node.left = new_node
           return
+        else
+          temp_node = temp_node.left
         end
-        temp_node = temp_node.link
+      elsif value > temp_node.value
+        if temp_node.right == nil
+          temp_node.right = new_node
+          return
+        else
+          temp_node = temp_node.right
+        end
       end
     end
-
-    new_node.link = @table[hash_code].head
-    @table[hash_code].head = new_node
-    @element_count += 1
-    value
   end
 
-  def search(key)
-    hash_code = self.hash_generator(key)
-    temp_node = @table[hash_code].head
-    counter = 0
-    until temp_node == nil
-      if temp_node.key == key
-        puts "Key: #{key}, index: #{hash_code}, position: #{counter}, value: #{temp_node.value}"
-        return
+  def insert(value, root)
+    new_node = Node.new(value)
+    if root == nil
+      root = new_node
+    elsif value <= root.value
+      if root.left == nil
+        root.left = new_node
+      else
+        insert(value, root.left)
       end
-      counter += 1
-      temp_node = temp_node.link
-    end
-    puts "Key #{key} not found!"
-    nil
-  end
-
-  def delete(key)
-    hash_code = self.hash_generator(key)
-    if @table[hash_code].head == nil
-      puts "Key #{key} not found!"
-      return nil
-    end
-
-    temp_node = @table[hash_code].head
-    value = nil
-    if temp_node.key == key
-      value = temp_node.value
-      next_node = temp_node.link
-      @table[hash_code].head = next_node
-      @element_count -= 1
-      return value
-    end
-
-    until temp_node.link == nil
-      next_node = temp_node.link.link
-      if temp_node.key == key
-        value = temp_node.link.value
-        temp_node.link = new_node
-        @element_count -= 1
-        return value
+    elsif value > root.value
+      if root.right == nil
+        root.right = new_node
+      else
+        insert(value, root.right)
       end
-      temp_node = temp_node.link
     end
-
-    puts "Key #{key} not found!"
-    return nil
+    root
   end
 
-  def table_size()
-    @element_count
+  def insert_node(value, root = @root)
+    @root = insert(value, root)
   end
 
-  def is_empty?()
-    (@element_count == 0) ? true : false
+  def append(value, root)
+    if root == nil
+      root = Node.new(value)
+    elsif value <= root.value
+      root.left = append(value, root.left)
+    else
+      root.right = append(value, root.right)
+    end
+    root
   end
 
+  def append_node(value, root = @root)
+    @root = append(value, root)
+  end
+
+  def contains?(value, root = @root)
+    return false if root == nil
+    if root.value == value
+      return true
+    elsif value <= root.value
+      contains?(value, root.left)
+    else
+      contains?(value, root.right)
+    end
+  end
+  
+  def find_min(root = @root)
+    return nil if root == nil
+    until root.left == nil
+      root = root.left
+    end
+    root.value
+  end
+
+  def find_min_recursion(root = @root)
+    return nil if root == nil
+    return root.value if root.left == nil
+    find_min_recursion(root.left)
+  end
+
+  def find_max(root = @root)
+    return nil if root == nil
+    until root.right == nil
+      root = root.right
+    end
+    root.value
+  end
+
+  def find_max_recursion(root = @root)
+    return nil if root == nil
+    return root.value if root.right == nil
+    find_max_recursion(root.right)
+  end
+
+  def root_height(root = @root)
+    return -1 if root == nil
+    left = root_height(root.left)
+    right = root_height(root.right)
+    return [left, right].max + 1
+  end
+
+  def level_traversal(root = @root)
+    return if root == nil
+    queue = Array.new()
+    queue.push(root)
+    while !queue.empty?()
+      dequque = queue.shift()
+      print "#{dequque.value} "
+      queue.push(dequque.left) if dequque.left != nil
+      queue.push(dequque.right) if dequque.right != nil
+    end
+    puts
+  end
+
+  def preorder_traversal(root = @root)
+    return if root == nil
+    print "#{root.value} "
+    preorder_traversal(root.left)
+    preorder_traversal(root.right)
+  end
+
+  def inorder_traversal(root = @root)
+    return if root == nil
+    inorder_traversal(root.left)
+    print "#{root.value} "
+    inorder_traversal(root.right)
+  end
+
+  def posorder_traversal(root = @root)
+    return if root == nil
+    posorder_traversal(root.left)
+    posorder_traversal(root.right)
+    print "#{root.value} "
+  end
+  #cheking if BT is BST
+  def is_subtree_lesser?(value, root = @root)
+    return true if root == nil
+    if root.value == value && is_subtree_lesser?(value, root.lef) &&
+
+  end
+
+  def is_subtree_greater?(value, root = @root)
+  end
+
+  def is_bst?(root = @root)
+  end
 end
 
-x = HashTable.new()
-x.insert('Howkeye', "Clint Barton")
-x.insert('Thor', "Thor Odinson")
-x.insert('Hulk', "Bruce Benner")
-x.insert('Capitan America', "Steve Rogers")
-x.insert('Iron-man', "Tony Stark")
-x.insert('Black Widow', "Natalia Romanova")
-x.insert('Spider-man', "Peter Parker")
-x.insert('Ant-man', "Scott Lang")
-x.insert('Winter Solider', "Bucky Barnes")
-x.insert('Black Panter', "T'Challa")
-x.insert('Falcon', 'Sam Wilson')
-x.insert('Scarlet Witch', 'Wanda Maximoff')
+x = BinarySearcTree.new()
+x.loop_insert('F')
+x.loop_insert('D')
+x.loop_insert('J')
+x.insert_node('B')
+x.insert_node('E')
+x.insert_node('G')
+x.insert_node('K')
+x.append_node('A')
+x.append_node('C')
+x.append_node('I')
+x.append_node('H')
 
-x.insert('Hulk', "BRUCE BANNER")
-x.search('Ant-man')
-x.search('Winter Solider')
-x.search('Falcon')
-x.delete('Howkeye')
-x.delete('Thor')
-x.insert('Vision', "Vision stone + ultron")
-x.insert('Vision', "Vision stone + ultron".upcase)
-
-
-x.display_table()
-p x.table_size()
-p x.is_empty?()
-
+p x.contains?('A')
+p x.contains?('Z')
+p x.find_min()
+p x.find_min_recursion()
+p x.find_max()
+p x.find_max_recursion()
+p x.root_height()
+x.level_traversal()
+x.preorder_traversal()
+puts
+x.inorder_traversal()
+puts
+x.posorder_traversal()
+puts
