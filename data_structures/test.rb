@@ -144,11 +144,12 @@ class BinarySearcTree
     preorder_traversal(root.right)
   end
 
-  def inorder_traversal(root = @root)
+  def inorder_traversal(root = @root, container = [])
     return if root == nil
-    inorder_traversal(root.left)
-    print "#{root.value} "
-    inorder_traversal(root.right)
+    inorder_traversal(root.left, container)
+    container << root.value
+    inorder_traversal(root.right, container)
+    container
   end
 
   def posorder_traversal(root = @root)
@@ -160,15 +161,170 @@ class BinarySearcTree
   #cheking if BT is BST
   def is_subtree_lesser?(value, root = @root)
     return true if root == nil
-    if root.value == value && is_subtree_lesser?(value, root.lef) &&
-
+    if root.value < value &&
+        is_subtree_lesser?(value, root.left) &&
+          is_subtree_lesser?(value, root.right)
+      return true
+    else
+      return false
+    end
   end
 
   def is_subtree_greater?(value, root = @root)
+    return true if root == nil
+    if root.value > value &&
+        is_subtree_greater?(value, root.left) &&
+          is_subtree_greater?(value, root.right)
+      return true
+    else
+      return false
+    end
   end
 
-  def is_bst?(root = @root)
+  def is_bts?(root = @root) #O(n^2)
+    return true if root == nil
+    if is_subtree_lesser?(root.value, root.left) &&
+        is_subtree_greater?(root.value, root.right) &&
+          is_bts?(root.left) && 
+            is_bts?(root.right)
+      return true
+    else
+      return false
+    end
   end
+
+  def is_bts2?(root = @root, min_value = '', max_value = '~~~~') #O(n)
+    return true if root == nil
+    if root.value > min_value && root.value < max_value &&
+        is_bts2?(root.left, min_value, root.value) &&
+          is_bts2?(root.right, root.value, max_value)
+      return true
+    else
+      return false
+    end
+
+  end
+
+  def is_bts3?(root = @root)
+    list = inorder_traversal(root)
+    (list == list.sort) ? true : false
+  end
+
+  def delete(value, root = @root)
+    if root == nil
+      return nil
+    elsif value < root.value
+      root.left = delete(value, root.left)
+    elsif value > root.value 
+      root.right = delete(value, root.right)
+    else #value == root.value
+      if root.left == nil && root.right == nil
+        root = nil
+      elsif root.left == nil
+        root = root.right
+      elsif root.right == nil
+        root = root.left
+      elsif root.left != nil && root.right != nil
+        temp_value = find_min_recursion(root.right)
+        root.value = temp_value
+        root.right = delete(temp_value, root.right)
+      end
+    end
+    root
+  end
+
+  def search(value, root = @root)
+    if root == nil
+      return nil
+    elsif value < root.value
+      search(value, root.left)
+    elsif value > root.value
+      search(value, root.right)
+    elsif root.value == value
+      return root
+    end
+  end
+
+  def inorder_successor(value, root = @root)
+    current = search(value, root)
+    if current == nil
+      return nil
+    end
+    if current.right != nil
+      #1 case has right subtree
+      temp_node = current.right
+      until temp_node.left == nil
+        temp_node = temp_node.left
+      end
+      return temp_node
+      #or return find_min(current.right)
+    else
+      #case 2 no right subtree
+      #walk the tree from root till current node, find deepest ancestor which
+      #current node will be in lest ST
+      successor = nil
+      ancestor = root
+      until ancestor == current
+        if current.value < ancestor.value
+          successor = ancestor #so far deepest node for which current node is in left
+          ancestor = ancestor.left
+        else
+          ancestor = ancestor.right
+        end
+      end
+      return successor
+    end
+  end
+
+  #AVL implementation
+  def child_height(root) #method for counting edges from child of current node (returns 0 insted -1)
+    return 0 if root == nil
+    left = child_height(root.left_child)
+    right = child_height(root.right_child)
+    return [left, right].max + 1
+  end
+
+  def balance_tree(node)
+    left = child_height(node.left_child) 
+    right = child_height(node.right_child)
+    if left - right == 2
+      if child_height(left.right_child) > child_height(left.left_child)
+        return rotate_left_right(node.left)
+      end
+      return rotate_right(node)
+    elsif right - left == 2
+      if child_height(right.right_child) > child_height(right.left_child)
+        return rotate_right_left(node.right)
+      end
+      return rotate_left(node)
+    end
+    node
+  end
+
+  def rotate_left(root)
+    temp_root = root.right_child
+    root.right_child = temp_root.left_child
+    temp_root.left_child = root
+    return temp_root
+  end
+
+  def rotate_right(root)
+    temp_root = root.left_child
+    root.left_child = temp_root.right_child
+    temp_root.right_child = root
+    return temp_root
+  end
+
+  def rotate_left_right(root)
+    root.left_child = rotate_left(root.left_child)
+    rotate_right(root)
+  end
+
+  def rotate_right_left(root)
+    root.right_child = rotate_right(root.right_child)
+    rotate_left(root)
+  end
+
 end
 
 x = BinarySearcTree.new()
@@ -183,18 +339,7 @@ x.append_node('A')
 x.append_node('C')
 x.append_node('I')
 x.append_node('H')
+p x.inorder_traversal().join(' ')
+p x.inorder_successor('H')
 
-p x.contains?('A')
-p x.contains?('Z')
-p x.find_min()
-p x.find_min_recursion()
-p x.find_max()
-p x.find_max_recursion()
-p x.root_height()
-x.level_traversal()
-x.preorder_traversal()
-puts
-x.inorder_traversal()
-puts
-x.posorder_traversal()
-puts
+

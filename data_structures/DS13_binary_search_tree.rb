@@ -1,256 +1,321 @@
 class BinarySearchTree
-
+  #helper class Node - represents object(element) in the tree
   class Node
-    attr_accessor :value, :left_child, :right_child
+    #node has data container(value) and references for left and right chiled from current node
+    attr_accessor :value, :link_left, :link_right
     def initialize(value)
       @value = value
-      @left_child = nil
-      @right_child = nil
+      @link_left = nil
+      @link_right = nil
     end
   end
-
+  #tree instance is created with root(pointing to first element), which is nil until inserting first element
   attr_accessor :root
   def initialize()
-    @root = nil#Node.new(value)#create root with empty node, now we can use references to @root
+    @root = nil
   end
-
+  #insert element into tree using loop
   def insert_with_loop(value)
     new_node = Node.new(value)
-    if @root == nil
+    #if tree is empty root points to new element (node)
+    if @root == nil 
       @root = new_node
       return
     end
+    #if tree is not empty, traversal until method find appropriate place
     temp_node = @root
-    while true
+    while true 
       if value <= temp_node.value
-        if temp_node.left_child == nil
-          temp_node.left_child = new_node
+        if temp_node.link_left == nil
+          temp_node.link_left = new_node
           return
         else
-          temp_node = temp_node.left_child
-        end   
-      elsif value > temp_node.value
-        if temp_node.right_child == nil
-          temp_node.right_child = new_node
+          temp_node = temp_node.link_left
+        end
+      else #value > temp_node.value
+        if temp_node.link_right == nil
+          temp_node.link_right = new_node
           return
         else
-          temp_node = temp_node.right_child
+          temp_node = temp_node.link_right
         end
       end
     end
   end
-
-  def insert(root = @root, value)
-    #require root to be empty node => @root = Node.new(nil), so referece can be valid
-    if root.value == nil
-      return root.value = value
-    elsif value <= root.value
-      if root.left_child == nil
-        return root.left_child = Node.new(value)
-      end
-      insert(root.left_child,value)
-    elsif value > root.value
-      if root.right_child == nil
-        return root.right_child = Node.new(value)
-      end
-      insert(root.right_child,value)
-    end
-  end
-
-  def insert_node(value)
-    @root = append_node(value)
-  end
-
-  def append_node(root = @root, value)
-    #global variable @root must be nil
+  #recursiv insert version 1
+  def insert_node(value, root) 
+    new_node = Node.new(value)
     if root == nil
-      root = Node.new(value)
+      root = new_node
     elsif value <= root.value
-      root.left_child = append_node(root.left_child, value)
-    else
-      root.right_child = append_node(root.right_child, value)
+      if root.link_left == nil
+        root.link_left = new_node
+      else
+        insert_node(value, root.link_left)
+      end
+    else #value > root.value
+      if root.link_right == nil
+        root.link_right = new_node
+      else
+        insert_node(value, root.link_right)
+      end
     end
     root
   end
 
-  def contains?(root = @root, value)
+  def insert(value) #insert node to instance of the tree
+    @root = insert_node(value, @root)
+  end
+  #recursiv insert version 2
+  def add_node(value, root)
+    if root == nil
+      root = Node.new(value)
+    elsif value <= root.value
+      root.link_left = add_node(value, root.link_left)
+    else #value > root.value
+      root.link_right = add_node(value, root.link_right)
+    end
+    root
+  end
+
+  def add(value)
+    @root = add_node(value, @root)
+  end
+  #search for element into tree
+  def contains?(value, root = @root)
+    #NOTE if value are diff data type will throw error(if you searching for integer in tree of strings)
     return false if root == nil
     if root.value == value
       return true
     elsif value <= root.value
-      contains?(root.left_child, value)
-    else 
-      contains?(root.right_child, value)
+      contains?(value, root.link_left)
+    else
+      contains?(value, root.link_right)
     end
   end
 
-  def search(root = @root, value)
+  def search(value, root = @root)
     return nil if root == nil
-    if root.value == value
+    if value == root.value
       return root
     elsif value <= root.value
-      search(root.left_child, value)
-    else 
-      search(root.right_child, value)
-    end
-  end
-
-  def find_min(root = @root)
-    return nil if root == nil
-    until root.left_child == nil
-      root = root.left_child
-    end
-    root.value 
-  end
-
-  def find_min_recursion(root = @root)
-    return nil if root == nil
-    if root.left_child == nil
-      return root.value
+      search(value, root.link_left)
     else
-      find_min_recursion(root.left_child)
+      search(value, root.link_right)
     end
   end
-
-  def find_max(root = @root)
+  #find minimum and maximum value in the tree
+  #minimmum value is in left most element in the tree, maximum value is in right most element
+  def min_value_with_loop(root = @root)
     return nil if root == nil
-    until root.right_child == nil
-      root = root.right_child
+    until root.link_left == nil
+      root = root.link_left
     end
     root.value
   end
-  
-  def find_max_recursion(root = @root)
+
+  def min_value(root = @root)
     return nil if root == nil
-    if root.right_child == nil
-      return root.value
-    else
-      find_max_recursion(root.right_child)
-    end
+    return root.value if root.link_left == nil
+    min_value(root.link_left)
   end
-  
-  def find_height(root = @root)
+
+  def max_value_with_loop(root = @root)
+    return nil if root == nil
+    until root.link_right == nil
+      root = root.link_right
+    end
+    root.value
+  end
+
+  def max_value(root)
+    return nil if root == nil
+    return root.value if root.link_right == nil
+    max_value(root.link_right)
+  end
+  #height of BST - number of edges from current node to leaf node(longest path)
+  def height(root = @root)
     return -1 if root == nil
-    left = find_height(root.left_child)
-    right = find_height(root.right_child)
+    left = height(root.link_left)
+    right = height(root.link_right)
     return [left, right].max + 1
   end
-
-  def breadth_first_traversal(root = @root)
+  #BST traversal
+  def level_traversal(root = @root) #breadth first strategy
     return nil if root == nil
-    queue = Array.new()
+    container = Array.new()
+    queue = Array.new() #store addresses of nodes in queue
     queue.push(root)
-    while !queue.empty?()
+    until queue.empty?
       temp_node = queue.shift()
-      print "#{temp_node.value.to_s} "
-      queue.push(temp_node.left_child) if temp_node.left_child != nil
-      queue.push(temp_node.right_child) if temp_node.right_child != nil
+      container << temp_node.value
+      queue.push(temp_node.link_left) if temp_node.link_left != nil
+      queue.push(temp_node.link_right) if temp_node.link_right != nil
     end
-    puts
+    container
   end
 
-  def preorder_traversal(root = @root)
+  def preorder_traversal(root = @root, container = []) #depth first strategy
     return if root == nil
-    print "#{root.value} "
-    preorder_traversal(root.left_child)
-    preorder_traversal(root.right_child)
+    container << root.value
+    preorder_traversal(root.link_left, container)
+    preorder_traversal(root.link_right, container)
+    container
   end
 
-  def inorder_traversal(root = @root, arr = [])
+  def inorder_traversal(root = @root, container = []) #depth first strategy
     return if root == nil
-    inorder_traversal(root.left_child, arr)
-    arr << root.value
-    inorder_traversal(root.right_child, arr)
-    arr
+    inorder_traversal(root.link_left, container)
+    container << root.value
+    inorder_traversal(root.link_right, container)
+    container
   end
 
-  def postorder_traversal(root = @root)
+  def postorder_traversal(root = @root, container = []) #depth first strategy
     return if root == nil
-    postorder_traversal(root.left_child)
-    postorder_traversal(root.right_child)
-    print "#{root.value} "
+    postorder_traversal(root.link_left, container)
+    postorder_traversal(root.link_right, container)
+    container << root.value
+    container
   end
-  #cheking if BT is BST
-  def is_bst?(root = @root, min_value = '', max_value = '~~~~~~')
+  #checking if tree is BST
+  #1.method is using helper method for checking are all nodes left from root lesser then current node.
+  #Or are all nodes right from current greater then root node.
+  def is_subtree_lesser?(value, root = @root)
     return true if root == nil
-    if root.value < max_value && root.value > min_value &&
-      is_bst?(root.left_child, min_value, root.value) &&
-        is_bst?(root.right_child, root.value, max_value)
+    if root.value <= value &&
+        is_subtree_lesser?(value, root.link_left) &&
+          is_subtree_lesser?(value, root.link_left) 
       return true
     else
       return false
     end
   end
 
-  def is_bst2?(root = @root)
-    list = inorder_traversal(root)
-    (list == list.sort) ? true : false
+  def is_subtree_greater?(value, root = @root)
+    return true if root == nil
+    if root.value > value &&
+        is_subtree_greater?(value, root.link_left) &&
+          is_subtree_greater?(value, root.link_right)
+      return true
+    else
+      return false
+    end
   end
-
+  #O(n^2), costly approch
+  def is_bst_1?(root = @root)
+    return true if root == nil
+    if is_subtree_lesser?(root.value, root.link_left) &&
+        is_subtree_greater?(root.value, root.link_right) &&
+          is_bst_1?(root.link_left) &&
+            is_bst_1?(root.link_right)
+      return true
+    else
+      return false
+    end
+  end
+  #2.method, using ranges with infinity and - infinity
+  def is_bst_2?(root = @root, min_value = "", max_value = "~~~~~") #O(n)
+    #min_value = - Float::INFINITY, max_value = Float::INFINITY for integers
+    return true if root == nil
+    if root.value > min_value && 
+        root.value < max_value &&
+          is_bst_2?(root.link_left, min_value, root.value) &&
+            is_bst_2?(root.link_right, root.value, max_value)
+      return true
+    else
+      return false
+    end
+  end
+  #3.method is using inorder traversal, inorder traversal returns sorted elements, if they are sorted
+  #tree is BST
+  def is_bst_3?(root = @root)
+    return nil if root == nil
+    node_list = inorder_traversal(root)
+    (node_list == node_list.sort) ? true : false
+  end
+  #deleting node from the tree
   def delete(value, root = @root)
     if root == nil
-      return nil
+      return root
     elsif value < root.value
-      root.left_child = delete(value, root.left_child)
+      root.link_left = delete(value, root.link_left)
     elsif value > root.value
-      root.right_child = delete(value, root.right_child)
-    else
-      if root.left_child == nil && root.right_child == nil
+      root.link_right = delete(value, root.link_right)
+    else #value == root.value -> now we can delete that node
+      #Case 1: current node is leaf
+      if root.link_left == nil && root.link_right == nil
         root = nil
-      elsif root.left_child == nil
-        root = root.right_child
-      elsif root.right_child == nil
-        root = root.left_child
-      elsif root.left_child != nil && root.right_child != nil
-        temp_node = find_min_recursion(root.right_child)
+      #Case 2: current node has 1 child
+      elsif root.link_left == nil
+        root = root.link_right
+      elsif root.link_right == nil
+        root = root.link_right
+      #Case 3: current node has both children
+      else #root.link_left != nil && root.link_right != nil
+        #first find min value in right side or max value in left side
+        temp_node = min_value(root.link_right)
+        #change value of current node with temp_node value
         root.value = temp_node
-        root.right_child = delete(temp_node, root.right_child)
+        #call recursivly delete method with changed value
+        root.link_right = delete(root.value, root.link_right)
+        #note-if choosing max value in left child, next step is 
+        #root.link_left = delete(root.value, root.link_left)
       end
     end
     root
   end
-
+  #find next grater value of input value
   def inorder_successor(value, root = @root)
-    temp_node = search(value)
-    return nil if temp_node == nil
-    if temp_node.right_child != nil
-      current = temp_node.right_child
-      while current.left_child != nil
-        current = current.left_child
+    return nil if root == nil
+    value_pointer = search(value)
+    #Case 1: if node has right child, the most left element is successor
+    if value_pointer.link_right != nil
+      temp_node = value_pointer.link_right
+      until temp_node.link_left == nil
+        temp_node = temp_node.link_left
       end
-      return current
-    else
+      return temp_node
+    else #Case 2: if node has no right child ancestor is successor
       successor = nil
       ancestor = root
-      while ancestor != temp_node
-        if temp_node.value < ancestor.value
+      until ancestor == value_pointer
+        if ancestor.value > value_pointer.value
           successor = ancestor
-          ancestor = ancestor.left_child
+          ancestor = ancestor.link_left
         else
-          ancestor = ancestor.right_child
+          #if anccestor atm doesn't have left child go right
+          ancestor = ancestor.link_right
         end
       end
       return successor
     end
   end
-
 end
 
-x = BinarySearchTree.new()
-x.insert_node('F')
-x.insert_with_loop('D')
-x.insert_node('J')
-x.insert_with_loop('B')
-x.insert_node('E')
-x.insert_with_loop('G')
-x.insert_node('K')
-x.insert_with_loop('A')
-x.insert_node('C')
-x.insert_with_loop('I')
-x.insert_node('H')
-puts x.inorder_traversal().join(' ')
-#x.delete('F')
-#puts x.inorder_traversal().join(' ')
-#p x.search('B')
-p x.inorder_successor('F')
+bst = BinarySearchTree.new()
+bst.add('F')
+bst.add('D')
+bst.add('J')
+bst.add('B')
+bst.add('E')
+bst.add('G')
+bst.add('K')
+bst.add('A')
+bst.add('C')
+bst.add('I')
+bst.add('H')
 
+#bst.root.link_left.value = 'Z'
+#p bts.search('D')
+#p bts.max_value(bts.search('D'))
+#p bst.height(bst.search('D'))
+#puts bst.level_traversal().join(' ')
+#puts bst.preorder_traversal().join(' ')
+#puts bst.inorder_traversal().join(' ')
+#puts bst.postorder_traversal().join(' ')
+#p bst.is_bst_2?()
+#puts bst.inorder_traversal().join(' ')
+#bst.delete('F')
+#puts bst.inorder_traversal().join(' ')
+p bst.inorder_successor('H')
