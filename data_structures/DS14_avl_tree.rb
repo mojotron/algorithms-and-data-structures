@@ -23,7 +23,6 @@ class AvlTree
     elsif value == root.value
       return root
     end
-    
     balance(root)
   end
 
@@ -123,27 +122,101 @@ class AvlTree
     end
     container
   end
+
+  def min_value(root = @root)
+    return nil if root == nil
+    return root.value if root.link_left == nil
+    min_value(root.link_left)
+  end
+
+  def max_value(root = @root)
+    return nil if root == nil
+    return root.value if root.link_right == nil
+    max_value(root.link_right)
+  end
+
+  def delete(value, root = @root)
+    if root == nil
+      return root
+    elsif value < root.value
+      root.link_left = delete(value, root.link_left)
+    elsif value > root.value
+      root.link_right = delete(value, root.link_right)
+    else #value == root.value -> now we can delete that node
+      #Case 1: current node is leaf
+      if root.link_left == nil && root.link_right == nil
+        root = nil
+      #Case 2: current node has 1 child
+      elsif root.link_left == nil
+        root = root.link_right
+      elsif root.link_right == nil
+        root = root.link_right
+      #Case 3: current node has both children
+      else #root.link_left != nil && root.link_right != nil
+        #first find min value in right side or max value in left side
+        temp_node = min_value(root.link_right)
+        #change value of current node with temp_node value
+        root.value = temp_node
+        #call recursivly delete method with changed value
+        root.link_right = delete(root.value, root.link_right)
+        #note-if choosing max value in left child, next step is 
+        #root.link_left = delete(root.value, root.link_left)
+      end
+    end
+
+    if root == nil
+      return root
+    else
+      return balance(root)
+    end
+  end
+
+  def print_tree(root = @root, indent = '')
+    return nil if root == nil
+    puts indent + root.value.to_s + "|"
+    print_tree(root.link_left, indent += "\s\s|")
+    print_tree(root.link_right, indent)
+  end
+
 end
 
 avl = AvlTree.new()
-avl.insert('A')
-avl.insert('B')
-avl.insert('C')
-avl.insert('D')
-avl.insert('E')
-avl.insert('F')
-avl.insert('G')
-avl.insert('H')
-avl.insert('I')
-avl.insert('J')
-avl.insert('K')
-avl.insert('L')
-avl.insert('M')
-avl.insert('N')
-avl.balance2()
-puts avl.level_traversal().join(' ')
-puts avl.inorder_traversal().join(' ')
-p avl.root
+avl.insert(100)
+avl.insert(95)
+avl.insert(90)
+avl.insert(85)
+avl.insert(80)
+avl.insert(75)
+avl.insert(70)
+avl.insert(65)
+avl.insert(60)
+avl.delete(70)
+avl.insert(55)
+avl.insert(50)
+avl.insert(45)
+avl.delete(80)
+avl.insert(40)
+avl.insert(35)
+avl.insert(30)
+avl.delete(100)
+avl.insert(25)
+avl.insert(20)
+avl.insert(15)
+avl.delete(65)
+avl.insert(10)
+avl.insert(5)
+avl.insert(1)
+avl.insert(17)
+avl.insert(28)
+avl.insert(39)
+avl.insert(66)
+avl.insert(88)
+#puts avl.inorder_traversal().join(' ')
+#puts avl.level_traversal().join(' ')
+#p avl.min_value()
+#p avl.max_value()
+#p avl.root
+avl.print_tree()
 
 
 =begin

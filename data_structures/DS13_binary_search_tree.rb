@@ -128,7 +128,7 @@ class BinarySearchTree
     root.value
   end
 
-  def max_value(root)
+  def max_value(root = @root)
     return nil if root == nil
     return root.value if root.link_right == nil
     max_value(root.link_right)
