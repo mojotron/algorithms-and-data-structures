@@ -1,10 +1,10 @@
-class BinarySearcTree
+class AvlTree
   class Node
-    attr_accessor :value, :left, :right
+    attr_accessor :value, :link_left, :link_right
     def initialize(value)
       @value = value
-      @left = nil
-      @right = nil
+      @link_left = nil
+      @link_right = nil
     end
   end
 
@@ -13,336 +13,147 @@ class BinarySearcTree
     @root = nil
   end
 
-  def loop_insert(value)
-    new_node = Node.new(value)
-    if @root == nil
-      @root = new_node
-      return
-    end
-    temp_node = @root
-    while true
-      if value <= temp_node.value
-        if temp_node.left == nil
-          temp_node.left = new_node
-          return
-        else
-          temp_node = temp_node.left
-        end
-      elsif value > temp_node.value
-        if temp_node.right == nil
-          temp_node.right = new_node
-          return
-        else
-          temp_node = temp_node.right
-        end
-      end
-    end
+  def print_tree(root = @root, indent = "")
+    return nil if root == nil
+    puts indent + root.value.to_s + "|"
+    print_tree(root.link_left, indent += "\s\s|")
+    print_tree(root.link_right, indent)
   end
 
-  def insert(value, root)
-    new_node = Node.new(value)
-    if root == nil
-      root = new_node
-    elsif value <= root.value
-      if root.left == nil
-        root.left = new_node
-      else
-        insert(value, root.left)
-      end
-    elsif value > root.value
-      if root.right == nil
-        root.right = new_node
-      else
-        insert(value, root.right)
-      end
-    end
-    root
+  def min_value(root = @root)
+    return nil if root == nil
+    return root.value if root.link_left == nil
+    min_value(root.link_left)
   end
 
-  def insert_node(value, root = @root)
-    @root = insert(value, root)
+  def max_value(root = @root)
+    return nil if root == nil
+    return root.value if root.link_right == nil
+    max_value(root.link_right)
   end
 
-  def append(value, root)
+  def insert_node_with_balance(value, root)
     if root == nil
       root = Node.new(value)
-    elsif value <= root.value
-      root.left = append(value, root.left)
-    else
-      root.right = append(value, root.right)
-    end
-    root
-  end
-
-  def append_node(value, root = @root)
-    @root = append(value, root)
-  end
-
-  def contains?(value, root = @root)
-    return false if root == nil
-    if root.value == value
-      return true
-    elsif value <= root.value
-      contains?(value, root.left)
-    else
-      contains?(value, root.right)
-    end
-  end
-  
-  def find_min(root = @root)
-    return nil if root == nil
-    until root.left == nil
-      root = root.left
-    end
-    root.value
-  end
-
-  def find_min_recursion(root = @root)
-    return nil if root == nil
-    return root.value if root.left == nil
-    find_min_recursion(root.left)
-  end
-
-  def find_max(root = @root)
-    return nil if root == nil
-    until root.right == nil
-      root = root.right
-    end
-    root.value
-  end
-
-  def find_max_recursion(root = @root)
-    return nil if root == nil
-    return root.value if root.right == nil
-    find_max_recursion(root.right)
-  end
-
-  def root_height(root = @root)
-    return -1 if root == nil
-    left = root_height(root.left)
-    right = root_height(root.right)
-    return [left, right].max + 1
-  end
-
-  def level_traversal(root = @root)
-    return if root == nil
-    queue = Array.new()
-    queue.push(root)
-    while !queue.empty?()
-      dequque = queue.shift()
-      print "#{dequque.value} "
-      queue.push(dequque.left) if dequque.left != nil
-      queue.push(dequque.right) if dequque.right != nil
-    end
-    puts
-  end
-
-  def preorder_traversal(root = @root)
-    return if root == nil
-    print "#{root.value} "
-    preorder_traversal(root.left)
-    preorder_traversal(root.right)
-  end
-
-  def inorder_traversal(root = @root, container = [])
-    return if root == nil
-    inorder_traversal(root.left, container)
-    container << root.value
-    inorder_traversal(root.right, container)
-    container
-  end
-
-  def posorder_traversal(root = @root)
-    return if root == nil
-    posorder_traversal(root.left)
-    posorder_traversal(root.right)
-    print "#{root.value} "
-  end
-  #cheking if BT is BST
-  def is_subtree_lesser?(value, root = @root)
-    return true if root == nil
-    if root.value < value &&
-        is_subtree_lesser?(value, root.left) &&
-          is_subtree_lesser?(value, root.right)
-      return true
-    else
-      return false
-    end
-  end
-
-  def is_subtree_greater?(value, root = @root)
-    return true if root == nil
-    if root.value > value &&
-        is_subtree_greater?(value, root.left) &&
-          is_subtree_greater?(value, root.right)
-      return true
-    else
-      return false
-    end
-  end
-
-  def is_bts?(root = @root) #O(n^2)
-    return true if root == nil
-    if is_subtree_lesser?(root.value, root.left) &&
-        is_subtree_greater?(root.value, root.right) &&
-          is_bts?(root.left) && 
-            is_bts?(root.right)
-      return true
-    else
-      return false
-    end
-  end
-
-  def is_bts2?(root = @root, min_value = '', max_value = '~~~~') #O(n)
-    return true if root == nil
-    if root.value > min_value && root.value < max_value &&
-        is_bts2?(root.left, min_value, root.value) &&
-          is_bts2?(root.right, root.value, max_value)
-      return true
-    else
-      return false
-    end
-
-  end
-
-  def is_bts3?(root = @root)
-    list = inorder_traversal(root)
-    (list == list.sort) ? true : false
-  end
-
-  def delete(value, root = @root)
-    if root == nil
-      return nil
     elsif value < root.value
-      root.left = delete(value, root.left)
-    elsif value > root.value 
-      root.right = delete(value, root.right)
-    else #value == root.value
-      if root.left == nil && root.right == nil
-        root = nil
-      elsif root.left == nil
-        root = root.right
-      elsif root.right == nil
-        root = root.left
-      elsif root.left != nil && root.right != nil
-        temp_value = find_min_recursion(root.right)
-        root.value = temp_value
-        root.right = delete(temp_value, root.right)
-      end
-    end
-    root
-  end
-
-  def search(value, root = @root)
-    if root == nil
-      return nil
-    elsif value < root.value
-      search(value, root.left)
+      root.link_left = insert_node_with_balance(value, root.link_left)
     elsif value > root.value
-      search(value, root.right)
-    elsif root.value == value
-      return root
+      root.link_right = insert_node_with_balance(value, root.link_right)
+    else #value == root.value
+      root.value == value
     end
+    balance(root)
   end
 
-  def inorder_successor(value, root = @root)
-    current = search(value, root)
-    if current == nil
-      return nil
-    end
-    if current.right != nil
-      #1 case has right subtree
-      temp_node = current.right
-      until temp_node.left == nil
-        temp_node = temp_node.left
-      end
-      return temp_node
-      #or return find_min(current.right)
-    else
-      #case 2 no right subtree
-      #walk the tree from root till current node, find deepest ancestor which
-      #current node will be in lest ST
-      successor = nil
-      ancestor = root
-      until ancestor == current
-        if current.value < ancestor.value
-          successor = ancestor #so far deepest node for which current node is in left
-          ancestor = ancestor.left
-        else
-          ancestor = ancestor.right
-        end
-      end
-      return successor
-    end
+  def insert(value)
+    @root = insert_node_with_balance(value, @root)
   end
-
-  #AVL implementation
-  def child_height(root) #method for counting edges from child of current node (returns 0 insted -1)
-    return 0 if root == nil
-    left = child_height(root.left_child)
-    right = child_height(root.right_child)
+  #balancing elements
+  def height(root = @root)
+    return -1 if root == nil
+    left = height(root.link_left)
+    right = height(root.link_right)
     return [left, right].max + 1
   end
 
-  def balance_tree(node)
-    left = child_height(node.left_child) 
-    right = child_height(node.right_child)
-    if left - right == 2
-      if child_height(left.right_child) > child_height(left.left_child)
-        return rotate_left_right(node.left)
+  def child_height(root = @root) #helper method for balance method
+    return 0 if root == nil
+    left = child_height(root.link_left)
+    right = child_height(root.link_right)
+    return [left, right].max + 1
+  end
+
+  def balance(root = @root)
+    #get balance factors of left and right child
+    left_bf = child_height(root.link_left)
+    right_bf = child_height(root.link_right)
+
+    if left_bf - right_bf == 2
+      if child_height(root.link_left.link_right) > child_height(root.link_left.link_left)
+        #nodes are set root root->left->right, needs double rotation => left then right
+        return rotate_left_right(root)
       end
-      return rotate_right(node)
-    elsif right - left == 2
-      if child_height(right.right_child) > child_height(right.left_child)
-        return rotate_right_left(node.right)
+      #nodes are set root->left->left, need single right rotation
+      return rotate_right(root)
+    elsif left_bf - right_bf == -2
+      if child_height(root.link_right.link_left) > child_height(root.link_right.link_right)
+        #nodes are set root root->right->left, needs double rotation => right then left
+        return rotate_right_left(root)
       end
-      return rotate_left(node)
+      #nodes are set root->right->right, need single left rotation
+      return rotate_left(root)
     end
-    node
+    root
+  end
+
+  def balance2(root)
+    balance_factor = child_height(root.link_left) - child_height(root.link_right)
+    if balance_factor == 2
+      if root.link_left.link_left
+        return rotate_right(root)
+      elsif root.link_left.link_right
+        return rotate_left_right(root)
+      end
+    elsif balance_factor == -2
+      if root.link_right.link_right
+        return rotate_right_left(root)
+      elsif root.link_right.link_left
+        return rotate_left(root)
+      end
+    end
+    root
   end
 
   def rotate_left(root)
-    temp_root = root.right_child
-    root.right_child = temp_root.left_child
-    temp_root.left_child = root
-    return temp_root
+    temp_node = root.link_right
+    root.link_right = temp_node.link_left
+    temp_node.link_left = root
+    temp_node
   end
 
   def rotate_right(root)
-    temp_root = root.left_child
-    root.left_child = temp_root.right_child
-    temp_root.right_child = root
-    return temp_root
+    temp_node = root.link_left
+    root.link_left = temp_node.link_right
+    temp_node.link_right = root
+    temp_node
   end
 
   def rotate_left_right(root)
-    root.left_child = rotate_left(root.left_child)
+    root.link_left = rotate_left(root.link_left)
     rotate_right(root)
   end
 
   def rotate_right_left(root)
-    root.right_child = rotate_right(root.right_child)
+    root.link_right = rotate_right(root.link_right)
     rotate_left(root)
+  end
+
+  def delete(value, root = @root)
+    if root == nil
+      return root
+    elsif value < root.value
+      root.link_left = delete(value, root.link_left)
+    elsif value > root.value
+      root.link_right = delete(value, root.link_right)
+    else #value == root.value
+      if root.link_left == nil && root.link_right == nil
+        root = nil
+      elsif root.link_left == nil
+        root = root.link_right
+      elsif root.link_right == nil
+        root = root.link_left
+      elsif root.link_left != nil && root.link_right != nil
+        temp_node = min_value(root.link_right)
+        root.value = temp_node.value
+        root.link_right = delete(root.value, root.link_right)
+      end
+    end
+    (root == nil) ? root : balance(root)
   end
 
 end
 
-x = BinarySearcTree.new()
-x.loop_insert('F')
-x.loop_insert('D')
-x.loop_insert('J')
-x.insert_node('B')
-x.insert_node('E')
-x.insert_node('G')
-x.insert_node('K')
-x.append_node('A')
-x.append_node('C')
-x.append_node('I')
-x.append_node('H')
-p x.inorder_traversal().join(' ')
-p x.inorder_successor('H')
-
-
+avl = AvlTree.new()
 avl.insert(100)
 avl.insert(95)
 avl.insert(90)
@@ -368,3 +179,11 @@ avl.delete(65)
 avl.insert(10)
 avl.insert(5)
 avl.insert(1)
+avl.insert(17)
+avl.insert(28)
+avl.insert(39)
+avl.insert(66)
+avl.insert(88)
+avl.print_tree()
+puts "Tree max value is: #{avl.max_value()}, and min value: #{avl.min_value()}"
+

@@ -291,6 +291,13 @@ class BinarySearchTree
       return successor
     end
   end
+
+  def print_tree(root = @root, indent = "")
+    return root if root == nil
+    puts indent + "|" +root.value.to_s 
+    print_tree(root.link_left, indent += "\s" * 4)
+    print_tree(root.link_right, indent)
+  end
 end
 
 bst = BinarySearchTree.new()
@@ -318,4 +325,5 @@ bst.add('H')
 #puts bst.inorder_traversal().join(' ')
 #bst.delete('F')
 #puts bst.inorder_traversal().join(' ')
-p bst.inorder_successor('H')
+#p bst.inorder_successor('H')
+bst.print_tree()
