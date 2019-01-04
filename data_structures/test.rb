@@ -1,189 +1,83 @@
-class AvlTree
-  class Node
-    attr_accessor :value, :link_left, :link_right
+require_relative "DS1_linked_list.rb"
+class Graph
+  class Vertex
+    attr_accessor :value, :edges
     def initialize(value)
       @value = value
-      @link_left = nil
-      @link_right = nil
+      @edges = LinkedList.new()
     end
   end
 
-  attr_accessor :root
+  attr_accessor :vertices
   def initialize()
-    @root = nil
+    @vertices = Array.new()
   end
 
-  def print_tree(root = @root, indent = "")
-    return nil if root == nil
-    puts indent + root.value.to_s + "|"
-    print_tree(root.link_left, indent += "\s\s|")
-    print_tree(root.link_right, indent)
-  end
-
-  def min_value(root = @root)
-    return nil if root == nil
-    return root.value if root.link_left == nil
-    min_value(root.link_left)
-  end
-
-  def max_value(root = @root)
-    return nil if root == nil
-    return root.value if root.link_right == nil
-    max_value(root.link_right)
-  end
-
-  def insert_node_with_balance(value, root)
-    if root == nil
-      root = Node.new(value)
-    elsif value < root.value
-      root.link_left = insert_node_with_balance(value, root.link_left)
-    elsif value > root.value
-      root.link_right = insert_node_with_balance(value, root.link_right)
-    else #value == root.value
-      root.value == value
+  def print_graph()
+    @vertices.each do |i|
+      print"[#{i.value}] => " 
+      temp_node = i.edges.head
+      until temp_node == nil
+        print temp_node.value + ' -> '
+        temp_node = temp_node.link
+      end
+      puts "nil"
     end
-    balance(root)
+  end
+  
+  def add_vertex(value)
+    return nil if find_vertex(value) #check if value already in list
+    node_new = Vertex.new(value)
+    @vertices << node_new
   end
 
-  def insert(value)
-    @root = insert_node_with_balance(value, @root)
-  end
-  #balancing elements
-  def height(root = @root)
-    return -1 if root == nil
-    left = height(root.link_left)
-    right = height(root.link_right)
-    return [left, right].max + 1
-  end
-
-  def child_height(root = @root) #helper method for balance method
-    return 0 if root == nil
-    left = child_height(root.link_left)
-    right = child_height(root.link_right)
-    return [left, right].max + 1
-  end
-
-  def balance(root = @root)
-    #get balance factors of left and right child
-    left_bf = child_height(root.link_left)
-    right_bf = child_height(root.link_right)
-
-    if left_bf - right_bf == 2
-      if child_height(root.link_left.link_right) > child_height(root.link_left.link_left)
-        #nodes are set root root->left->right, needs double rotation => left then right
-        return rotate_left_right(root)
-      end
-      #nodes are set root->left->left, need single right rotation
-      return rotate_right(root)
-    elsif left_bf - right_bf == -2
-      if child_height(root.link_right.link_left) > child_height(root.link_right.link_right)
-        #nodes are set root root->right->left, needs double rotation => right then left
-        return rotate_right_left(root)
-      end
-      #nodes are set root->right->right, need single left rotation
-      return rotate_left(root)
+  def find_vertex(value)
+    i = 0
+    while i < @vertices.size
+      return @vertices[i] if @vertices[i].value == value
+      i += 1
     end
-    root
+    nil
   end
 
-  def balance2(root)
-    balance_factor = child_height(root.link_left) - child_height(root.link_right)
-    if balance_factor == 2
-      if root.link_left.link_left
-        return rotate_right(root)
-      elsif root.link_left.link_right
-        return rotate_left_right(root)
-      end
-    elsif balance_factor == -2
-      if root.link_right.link_right
-        return rotate_right_left(root)
-      elsif root.link_right.link_left
-        return rotate_left(root)
-      end
-    end
-    root
+  def insert_edge(vertex_1, vertex_2)
+    v1 = find_vertex(vertex_1)
+    return if v1 == nil
+    v2 = find_vertex(vertex_2)
+    return if v2 == nil
+    return nil if v1.edges.search(v2.value)
+    v1.edges.push(v2.value)
   end
-
-  def rotate_left(root)
-    temp_node = root.link_right
-    root.link_right = temp_node.link_left
-    temp_node.link_left = root
-    temp_node
-  end
-
-  def rotate_right(root)
-    temp_node = root.link_left
-    root.link_left = temp_node.link_right
-    temp_node.link_right = root
-    temp_node
-  end
-
-  def rotate_left_right(root)
-    root.link_left = rotate_left(root.link_left)
-    rotate_right(root)
-  end
-
-  def rotate_right_left(root)
-    root.link_right = rotate_right(root.link_right)
-    rotate_left(root)
-  end
-
-  def delete(value, root = @root)
-    if root == nil
-      return root
-    elsif value < root.value
-      root.link_left = delete(value, root.link_left)
-    elsif value > root.value
-      root.link_right = delete(value, root.link_right)
-    else #value == root.value
-      if root.link_left == nil && root.link_right == nil
-        root = nil
-      elsif root.link_left == nil
-        root = root.link_right
-      elsif root.link_right == nil
-        root = root.link_left
-      elsif root.link_left != nil && root.link_right != nil
-        temp_node = min_value(root.link_right)
-        root.value = temp_node.value
-        root.link_right = delete(root.value, root.link_right)
-      end
-    end
-    (root == nil) ? root : balance(root)
-  end
-
 end
 
-avl = AvlTree.new()
-avl.insert(100)
-avl.insert(95)
-avl.insert(90)
-avl.insert(85)
-avl.insert(80)
-avl.insert(75)
-avl.insert(70)
-avl.insert(65)
-avl.insert(60)
-avl.delete(70)
-avl.insert(55)
-avl.insert(50)
-avl.insert(45)
-avl.delete(80)
-avl.insert(40)
-avl.insert(35)
-avl.insert(30)
-avl.delete(100)
-avl.insert(25)
-avl.insert(20)
-avl.insert(15)
-avl.delete(65)
-avl.insert(10)
-avl.insert(5)
-avl.insert(1)
-avl.insert(17)
-avl.insert(28)
-avl.insert(39)
-avl.insert(66)
-avl.insert(88)
-avl.print_tree()
-puts "Tree max value is: #{avl.max_value()}, and min value: #{avl.min_value()}"
-
+x = Graph.new()
+x.add_vertex('A')
+x.add_vertex('B')
+x.add_vertex('C')
+x.add_vertex('D')
+x.add_vertex('E')
+x.add_vertex('F')
+x.add_vertex('G')
+x.add_vertex('H')
+x.insert_edge('A', 'B')
+x.insert_edge('A', 'C')
+x.insert_edge('A', 'D')
+x.insert_edge('B', 'A')
+x.insert_edge('B', 'E')
+x.insert_edge('B', 'F')
+x.insert_edge('A', 'B')
+x.insert_edge('C', 'A')
+x.insert_edge('C', 'G')
+x.insert_edge('D', 'A')
+x.insert_edge('D', 'H')
+x.insert_edge('E', 'B')
+x.insert_edge('E', 'H')
+x.insert_edge('F', 'B')
+x.insert_edge('F', 'H')
+x.insert_edge('G', 'C')
+x.insert_edge('G', 'H')
+x.insert_edge('H', 'D')
+x.insert_edge('H', 'E')
+x.insert_edge('H', 'F')
+x.insert_edge('H', 'G')
+x.print_graph()
