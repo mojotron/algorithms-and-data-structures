@@ -139,18 +139,84 @@ class Graph
     temp_vertex.edges.delete(vertex_2)
   end
 
-  def depth_first_traversal(vertex = @vertices[0])
-    queue = Array.new()
-    queue.push(vertex)
-    while !queue.empty?
+  def depth_first_traversal(vertex) #iterativ approch
+    visited = Array.new()
+    stack = Array.new()
+    stack.push(search_vertex(vertex))
+    while !stack.empty?
+      temp_vertex = stack.pop()
+      print temp_vertex.value + ' -> ' if !visited.include?(temp_vertex.value)
+      visited << temp_vertex.value
+      if temp_vertex.edges.head 
+        temp_node = temp_vertex.edges.head 
+        b = []
+        until temp_node == nil
+          b.push(search_vertex(temp_node.value)) if !visited.include?(temp_node.value)
+          temp_node = temp_node.link
+        end
+        #restack so first item in edges is visited first
+        while !b.empty?
+          stack.push(b.pop())
+        end
+      end
+    end
+    puts
+  end
+
+  def depth_first_recursive(vertex, visited = [])
+    temp_vertex = search_vertex(vertex)
+    print temp_vertex.value + ' -> '
+    visited << temp_vertex.value
+
+    if temp_vertex.edges
+      temp_node = temp_vertex.edges.head
+      until temp_node == nil
+        depth_first_recursive(temp_node.value, visited) if !visited.include?(temp_node.value)
+        temp_node = temp_node.link
+      end
     end
   end
 
-  def bradth_first_traversal()
+  def bradth_first_traversal(vertex) #iterativ approch
+    visited = Array.new()
+    queue = Array.new()
+    queue.push(search_vertex(vertex))
+    while !queue.empty?
+      temp_vertex = queue.shift()
+      print temp_vertex.value + ' -> ' if !visited.include?(temp_vertex.value)
+      visited << temp_vertex.value
+      if temp_vertex.edges.head
+        temp_node = temp_vertex.edges.head
+        until temp_node == nil
+          queue.push(search_vertex(temp_node.value)) if !visited.include?(temp_node.value)
+          temp_node = temp_node.link
+        end
+      end
+    end
+    puts
   end
+  
+  def bradth_first_recursive(vertex, queue = [], visited = [])
+    temp_vertex = search_vertex(vertex)
+    return if temp_vertex == nil
+
+    print temp_vertex.value + ' -> ' if !visited.include?(temp_vertex.value)
+    visited << temp_vertex.value
+    
+    if temp_vertex.edges
+      temp_node = temp_vertex.edges.head
+      until temp_node == nil
+        queue << temp_node.value if !visited.include?(temp_node.value)
+        temp_node = temp_node.link
+      end
+    end
+    bradth_first_recursive(queue.shift(), queue, visited)
+  end
+
 end
 
 x = Graph.new()
+x.add_vertex('S')
 x.add_vertex('A')
 x.add_vertex('B')
 x.add_vertex('C')
@@ -158,34 +224,66 @@ x.add_vertex('D')
 x.add_vertex('E')
 x.add_vertex('F')
 x.add_vertex('G')
-x.add_vertex('H')
-x.add_edge('A', 'B')
-x.add_edge('A', 'C')
+x.add_edge('S', 'A')
+x.add_edge('A', 'S')
+x.add_edge('S', 'B')
+x.add_edge('B', 'S')
+x.add_edge('S', 'C')
+x.add_edge('C', 'S')
 x.add_edge('A', 'D')
-x.add_edge('B', 'A')
-x.add_edge('B', 'E')
-x.add_edge('B', 'F')
-x.add_edge('A', 'B')
-x.add_edge('C', 'A')
-x.add_edge('C', 'G')
 x.add_edge('D', 'A')
-x.add_edge('D', 'H')
+x.add_edge('B', 'E')
 x.add_edge('E', 'B')
-x.add_edge('E', 'H')
-x.add_edge('F', 'B')
-x.add_edge('F', 'H')
-x.add_edge('G', 'C')
-x.add_edge('G', 'H')
-x.add_edge('H', 'D')
-x.add_edge('H', 'E')
-x.add_edge('H', 'F')
-x.add_edge('H', 'G')
-x.delete_vertex('A')
-x.delete_vertex('H')
-x.print_graph()
+x.add_edge('C', 'F')
+x.add_edge('F', 'C')
+x.add_edge('D', 'G')
+x.add_edge('G', 'D')
+x.add_edge('E', 'G')
+x.add_edge('G', 'E')
+x.add_edge('F', 'G')
+x.add_edge('G', 'F')
+x.add_edge('F', 'C')
 
+#x.delete_vertex('A')
+#x.delete_vertex('H')
+x.print_graph()
+x.depth_first_traversal('S')
+x.depth_first_recursive('S')
+puts
+x.bradth_first_traversal('S')
+x.bradth_first_recursive('S')
+puts
 
 =begin
+
+
+x.add_vertex('S')
+x.add_vertex('A')
+x.add_vertex('B')
+x.add_vertex('C')
+x.add_vertex('D')
+x.add_vertex('E')
+x.add_vertex('F')
+x.add_vertex('G')
+x.add_edge('S', 'A')
+x.add_edge('A', 'S')
+x.add_edge('S', 'B')
+x.add_edge('B', 'S')
+x.add_edge('S', 'C')
+x.add_edge('C', 'S')
+x.add_edge('A', 'D')
+x.add_edge('D', 'A')
+x.add_edge('B', 'E')
+x.add_edge('E', 'B')
+x.add_edge('C', 'F')
+x.add_edge('F', 'C')
+x.add_edge('D', 'G')
+x.add_edge('G', 'D')
+x.add_edge('E', 'G')
+x.add_edge('G', 'E')
+x.add_edge('F', 'G')
+x.add_edge('G', 'F')
+x.add_edge('F', 'C')
 x = LinkedList.new()
 x.push('A')
 x.push('B')
