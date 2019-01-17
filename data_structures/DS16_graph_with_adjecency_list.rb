@@ -101,7 +101,7 @@ class Graph
 
   def add_vertex(value)
     if contain_vertex?(value)
-      puts "Name #{value} already in the graph!"
+      # puts "Name #{value} already in the graph!"
       return nil
     end
     @vertices << Vertex.new(value)
@@ -215,6 +215,7 @@ class Graph
 
 end
 
+=begin
 x = Graph.new()
 x.add_vertex('S')
 x.add_vertex('A')
@@ -254,7 +255,7 @@ x.bradth_first_traversal('S')
 x.bradth_first_recursive('S')
 puts
 
-=begin
+
 
 
 x.add_vertex('S')

@@ -47,7 +47,6 @@ class Graph
 
   def add_vertex(value)
     @matrix << Vertex.new(value)
-    "\n"
     @matrix.each do |vertex|
       until vertex.edges.size == @matrix.size
         vertex.edges << 0
@@ -82,7 +81,7 @@ class Graph
   def connected?(vertex_1, vertex_2)
     x = search_vertex_index(vertex_1)
     y = search_vertex_index(vertex_2)
-    return if x == nil || y == nil
+    return false if x == nil || y == nil
     (@matrix[x].edges[y] == 1) ? true : false
   end
   #traversal
