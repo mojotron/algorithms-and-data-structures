@@ -1,14 +1,14 @@
 require_relative "test.rb"
 
 class Graph
-  #class Vertex
-  #  attr_accessor :value, :edges, :id
-  #  def initialize(value)
-  #    @value = value
-  #    @id = nil
-  #    @edges = LinkedList.new()
-  #  end
-  #end
+  class Vertex
+    attr_accessor :value, :edges
+    def initialize(value)
+      @value = value
+      @edges = LinkedList.new()
+      @visited = false    
+    end
+  end
 
   def print_board()
     a = (@vertices.size ** 0.5).floor
@@ -21,6 +21,7 @@ class Graph
       i += a
     end
   end
+  
   def print_graph()
     @vertices.each do |vertex|
       puts "#{vertex.value}{#{vertex.edges.get_list}}"
@@ -38,12 +39,23 @@ class Graph
       visited << temp_vertex.value
       temp_node = temp_vertex.edges.head
       until temp_node == nil
-        x = search_vertex(temp_node.value)
-        stack << x if !visited.include?(temp_node.value)
+        stack << search_vertex(temp_node.value) if !visited.include?(temp_node.value)
         temp_node = temp_node.link
       end
     end
     list
+  end
+
+  def dfs_rec(start_vertex , visited = [], container = [])
+    temp_vertex = search_vertex(start_vertex)
+    container << temp_vertex.value
+    visited << temp_vertex.value if !visited.include?(temp_vertex.value)
+    temp_node = temp_vertex.edges.head
+    until temp_node == nil
+      dfs_rec(temp_node.value, visited, container) if !visited.include?(temp_node.value)
+      temp_node = temp_node.link
+    end
+    container
   end
 end
 
@@ -63,9 +75,6 @@ def knight_legal_moves(graph)
   end
 end
 
-def onboard_position()
-end
-
 def knight_tour_graph(board_size)
   board = Graph.new()
   board_size.times do |row|
@@ -76,13 +85,11 @@ def knight_tour_graph(board_size)
   board
 end
 
-
-
-
-
-
 x = knight_tour_graph(8)
-#x.print_board()
 knight_legal_moves(x)
-#x.print_graph()
-p x.depth_traversal([2,2])
+
+p x.depth_traversal([6,3]).size
+p x.dfs_rec([6,3]).size
+
+
+

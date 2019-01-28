@@ -1,7 +1,7 @@
-class LinkedList
-  class Node
+class LinkedList #helper class for representing list of edges of single vertex
+  class Node #LL helper class for representing sinle edge
     attr_accessor :value, :link
-    def initialize(value)
+    def initialize(value) 
       @value = value
       @link = nil
     end
@@ -13,16 +13,6 @@ class LinkedList
     @tail = nil
   end
 
-  def print_list()
-    container = Array.new()
-    temp_node = @head
-    until temp_node == nil
-      container << temp_node.value
-      temp_node = temp_node.link
-    end
-    container
-  end
-
   def list_contains?(value)
     temp_node = @head
     until temp_node == nil
@@ -32,27 +22,40 @@ class LinkedList
     false
   end
 
-  def push(value) #append node with O(1) time complexity
+  def get_list()
+    container = Array.new()
+    temp_node = @head
+    until temp_node == nil
+      container << temp_node.value
+      temp_node = temp_node.link
+    end
+    container
+  end
+
+  def append(value) #append node to end of list in constant time O(1), using tail pointer
     new_node = Node.new(value)
     if @head == nil
       @head = new_node
       @tail = new_node
+      return
     else
       @tail.link = new_node
       @tail = @tail.link
     end
   end
 
-  def delete(value)
+  def delete(value) #delete node in linear time O(n)
     return nil if !list_contains?(value)
-    return @head = @head.link if @head.value == value
-    
+    if @head.value == value
+      return @head = @tail = nil if @head == @tail #graph will always have unique values
+      return @head = @head.link
+    end
     temp_node = @head.link
     prev_node = @head
     until temp_node == nil
       if temp_node.value == value
-        prev_node.link = temp_node.link 
-        @tail = prev_node if @tail.value == value #!!!!
+        prev_node.link = temp_node.link
+        @tail = prev_node if @tail.value == value
         return
       end
       temp_node = temp_node.link
@@ -61,161 +64,130 @@ class LinkedList
   end
 end
 
-class Graph
-  class Vertex
-    attr_accessor :value, :edges
+class Graph #main class for creating graph object
+  class Vertex #helper class for representing elements in the graph
+    #vertex has 2 parts, value(key, payload) and list of edges(connections with other vertices)
+    attr_accessor :value, :edges 
     def initialize(value)
       @value = value
       @edges = LinkedList.new()
     end
   end
-
+  
   attr_accessor :vertices
   def initialize()
-    @vertices = Array.new()
+    @vertices = Array.new() #graph is collection of vertices
   end
 
-  def contain_vertex?(value)
-    i = 0
-    while i < @vertices.size
-      return true if value == @vertices[i].value
-      i += 1
-    end
+  def print_graph()#print all vertices with edges
+    @vertices.each { |vertex| puts "[#{vertex.value}]{#{vertex.edges.get_list.join(',')}}" }
+  end
+
+  def contains_vertex?(value)
+    @vertices.each { |vertex| return true if vertex.value == value }
     false
   end
 
   def search_vertex(value)
-    i = 0
-    while i < @vertices.size
-      return @vertices[i] if value == @vertices[i].value
-      i += 1
-    end
+    @vertices.each { |vertex| return vertex if vertex.value == value }
     nil
   end
 
-  def print_graph()
-    @vertices.each do |vertex|
-      puts "[#{vertex.value}]{#{vertex.edges.print_list.join(',')}}"
-    end
-  end
-
   def add_vertex(value)
-    if contain_vertex?(value)
-      # puts "Name #{value} already in the graph!"
-      return nil
-    end
+    return nil if contains_vertex?(value)
     @vertices << Vertex.new(value)
   end
 
-  def add_edge(vertex_1, vertex_2, weight = 0)
-    vertex_a = search_vertex(vertex_1)
-    return if vertex_a == nil
-    vertex_b = search_vertex(vertex_2)
-    return if vertex_b == nil
-    #check if edge already set
-    return nil if vertex_a.edges.list_contains?(vertex_b.value)
-    vertex_a.edges.push(vertex_b.value)
+  def connected?(vertex_1, vertex_2)
+    search_vertex(vertex_1).edges.list_contains?(vertex_2)
   end
 
-  def connected?(vertex_1, vertex_2)
-    temp_vertex = search_vertex(vertex_1)
-    return false if temp_vertex == nil
-    temp_vertex.edges.list_contains?(vertex_2)
+  def add_edge(vertex_1, vertex_2)
+    vertex_a = search_vertex(vertex_1)
+    return nil if vertex_a == nil
+    vertex_b = search_vertex(vertex_2)
+    return nil if vertex_b == nil
+    return nil if connected?(vertex_1, vertex_2)
+    vertex_a.edges.append(vertex_b.value)
   end
 
   def delete_vertex(value)
     temp_vertex = search_vertex(value)
-    @vertices.delete(temp_vertex)
-    @vertices.each do |vertex|
-      if vertex.edges.list_contains?(value)
-        vertex.edges.delete(value)
-      end
+    return nil if temp_vertex == nil
+    @vertices.delete(temp_vertex) #delete vertex from list
+    @vertices.each do |vertex| #delete edges to deletet vertex from rest of vertices
+      vertex.edges.delete(value) if vertex.edges.list_contains?(value)  
     end
+    temp_vertex.value
   end
 
   def delete_edge(vertex_1, vertex_2)
-    return if !connected?(vertex_1, vertex_2)
-    temp_vertex = search_vertex(vertex_1)
-    temp_vertex.edges.delete(vertex_2)
+    return nil if !connected?(vertex_1, vertex_2)
+    search_vertex(vertex_1).edges.delete(vertex_2)
   end
-
-  def depth_first_traversal(vertex) #iterativ approch
+  #graph traversal
+  def depth_first_traversal(start_vertex)#using stack
     visited = Array.new()
     stack = Array.new()
-    stack.push(search_vertex(vertex))
-    while !stack.empty?
+    stack << search_vertex(start_vertex)
+    until stack.empty?
       temp_vertex = stack.pop()
-      print temp_vertex.value + ' -> ' if !visited.include?(temp_vertex.value)
-      visited << temp_vertex.value
-      if temp_vertex.edges.head 
-        temp_node = temp_vertex.edges.head 
-        b = []
-        until temp_node == nil
-          b.push(search_vertex(temp_node.value)) if !visited.include?(temp_node.value)
-          temp_node = temp_node.link
-        end
-        #restack so first item in edges is visited first
-        while !b.empty?
-          stack.push(b.pop())
-        end
+      visited << temp_vertex.value if !visited.include?(temp_vertex.value)
+      vertex_edges = temp_vertex.edges.head
+      temp_stack = Array.new() #for restack, so output is same as in recursion
+      until vertex_edges == nil
+        temp_stack << search_vertex(vertex_edges.value) if !visited.include?(vertex_edges.value)
+        vertex_edges = vertex_edges.link
+      end
+      until temp_stack.empty?
+        stack << temp_stack.pop()
       end
     end
-    puts
+    visited
   end
 
-  def depth_first_recursive(vertex, visited = [])
-    temp_vertex = search_vertex(vertex)
-    print temp_vertex.value + ' -> '
-    visited << temp_vertex.value
-
-    if temp_vertex.edges
-      temp_node = temp_vertex.edges.head
-      until temp_node == nil
-        depth_first_recursive(temp_node.value, visited) if !visited.include?(temp_node.value)
-        temp_node = temp_node.link
-      end
+  def depth_first_recursive(start_vertex, visited = [])#using recusion, without stack DS
+    temp_vertex = search_vertex(start_vertex)
+    visited << temp_vertex.value if !visited.include?(temp_vertex.value)
+    vertex_edges = temp_vertex.edges.head
+    until vertex_edges == nil
+      depth_first_recursive(vertex_edges.value, visited) if !visited.include?(vertex_edges.value)
+      vertex_edges = vertex_edges.link
     end
+    visited
   end
 
-  def bradth_first_traversal(vertex) #iterativ approch
+  def bradth_first_traversal(start_vertex) #using queue
     visited = Array.new()
     queue = Array.new()
-    queue.push(search_vertex(vertex))
-    while !queue.empty?
+    queue << search_vertex(start_vertex)
+    until queue.empty?
       temp_vertex = queue.shift()
-      print temp_vertex.value + ' -> ' if !visited.include?(temp_vertex.value)
-      visited << temp_vertex.value
-      if temp_vertex.edges.head
-        temp_node = temp_vertex.edges.head
-        until temp_node == nil
-          queue.push(search_vertex(temp_node.value)) if !visited.include?(temp_node.value)
-          temp_node = temp_node.link
-        end
+      visited << temp_vertex.value if !visited.include?(temp_vertex.value)
+      vertex_edges = temp_vertex.edges.head
+      until vertex_edges == nil
+        queue << search_vertex(vertex_edges.value) if !visited.include?(vertex_edges.value)
+        vertex_edges = vertex_edges.link
       end
     end
-    puts
+    visited
   end
-  
-  def bradth_first_recursive(vertex, queue = [], visited = [])
-    temp_vertex = search_vertex(vertex)
-    return if temp_vertex == nil
 
-    print temp_vertex.value + ' -> ' if !visited.include?(temp_vertex.value)
-    visited << temp_vertex.value
-    
-    if temp_vertex.edges
-      temp_node = temp_vertex.edges.head
-      until temp_node == nil
-        queue << temp_node.value if !visited.include?(temp_node.value)
-        temp_node = temp_node.link
-      end
+  def bradth_first_recursive(start_vertex, queue = [], visited = [])
+    temp_vertex = search_vertex(start_vertex)
+    return if start_vertex == nil
+    visited << temp_vertex.value if !visited.include?(temp_vertex.value)
+    vertex_edges = temp_vertex.edges.head
+    until vertex_edges == nil
+      queue.push(vertex_edges.value) if !visited.include?(vertex_edges.value)
+      vertex_edges = vertex_edges.link
     end
     bradth_first_recursive(queue.shift(), queue, visited)
+    visited
   end
 
 end
 
-=begin
 x = Graph.new()
 x.add_vertex('S')
 x.add_vertex('A')
@@ -225,47 +197,7 @@ x.add_vertex('D')
 x.add_vertex('E')
 x.add_vertex('F')
 x.add_vertex('G')
-x.add_edge('S', 'A')
-x.add_edge('A', 'S')
-x.add_edge('S', 'B')
-x.add_edge('B', 'S')
-x.add_edge('S', 'C')
-x.add_edge('C', 'S')
-x.add_edge('A', 'D')
-x.add_edge('D', 'A')
-x.add_edge('B', 'E')
-x.add_edge('E', 'B')
-x.add_edge('C', 'F')
-x.add_edge('F', 'C')
-x.add_edge('D', 'G')
-x.add_edge('G', 'D')
-x.add_edge('E', 'G')
-x.add_edge('G', 'E')
-x.add_edge('F', 'G')
-x.add_edge('G', 'F')
-x.add_edge('F', 'C')
-
-#x.delete_vertex('A')
-#x.delete_vertex('H')
-x.print_graph()
-x.depth_first_traversal('S')
-x.depth_first_recursive('S')
-puts
-x.bradth_first_traversal('S')
-x.bradth_first_recursive('S')
-puts
-
-
-
-
 x.add_vertex('S')
-x.add_vertex('A')
-x.add_vertex('B')
-x.add_vertex('C')
-x.add_vertex('D')
-x.add_vertex('E')
-x.add_vertex('F')
-x.add_vertex('G')
 x.add_edge('S', 'A')
 x.add_edge('A', 'S')
 x.add_edge('S', 'B')
@@ -285,15 +217,12 @@ x.add_edge('G', 'E')
 x.add_edge('F', 'G')
 x.add_edge('G', 'F')
 x.add_edge('F', 'C')
-x = LinkedList.new()
-x.push('A')
-x.push('B')
-x.push('C')
-x.push('D')
-x.push('E')
-x.push('F')
-x.delete('A')
-p x.print_list()
-p x.head
-p x.tail
-=end
+x.add_edge('F', 'C')
+x.add_edge('F', 'C')
+
+x.print_graph()
+p x.depth_first_traversal('S')
+p x.depth_first_recursive('S')
+p x.bradth_first_traversal('S')
+p x.bradth_first_recursive('S')
+
