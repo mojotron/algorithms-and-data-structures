@@ -187,7 +187,7 @@ class Graph #main class for creating graph object
   end
 
 end
-
+=begin
 x = Graph.new()
 x.add_vertex('S')
 x.add_vertex('A')
@@ -225,4 +225,4 @@ p x.depth_first_traversal('S')
 p x.depth_first_recursive('S')
 p x.bradth_first_traversal('S')
 p x.bradth_first_recursive('S')
-
+=end

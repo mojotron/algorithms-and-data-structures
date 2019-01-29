@@ -1,19 +1,17 @@
 input_file = "english_dictionary.txt"
-output_file = "tree_letter_words.txt"
+output_file = "three_letter_words.txt"
 
 def filter_words(input_file, output_file, word_length)
-  open_input = File.new(input_file, 'r')
-  open_output = File.new(output_file, 'w')
-  temp_dictionary = Array.new()
+  open_input_file = File.new(input_file, 'r')
+  open_output_file = File.new(output_file, 'w')
+  words = Array.new()
 
-  open_input.each do |line|
+  open_input_file.each do |line|
     word = line.downcase.chomp
-    temp_dictionary << word if word.length == word_length && word.match(/^[a-z]*$/)
+    words << word if word.length == word_length && word.match(/^[a-z]*$/)
   end
 
-  temp_dictionary.each do |word|
-    open_output << "#{word}\n"
-  end
+  words.each { |word| open_output_file << "#{word}\n" }
 end
 
 filter_words(input_file, output_file, 3)

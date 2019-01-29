@@ -1,105 +1,109 @@
-require_relative "test.rb"
+require_relative "DS16_graph_with_adjecency_list.rb"
+#using words with 3 letter for faster runtime
 list_of_words = "english_dictionary/three_letter_words.txt"
-buckets = Hash.new()
-#create buckest, each bucket holds all words that are diff by 1 char
-word_file = File.open(list_of_words, 'r')
-word_file.each do |line|
+#first create bucket of words thet differ 1 letter
+buckets_list = Hash.new()
+words_file = File.new(list_of_words, 'r')
+words_file.each do |line|
   word = line.chomp
-  i = 0
+  i = 0 #pointer current letter in loop
   while i < word.length
-    bucket = "#{word[0...i]}_#{word[i+1..-1]}"
-    if buckets.include?(bucket)
-      buckets[bucket] << word
+    bucket = word[0...i] + '_' + word[i + 1..-1] #create key for bucket hash like d_g
+    if buckets_list.include?(bucket) #check if bucket is already in bucket list
+      buckets_list[bucket] << word #append current word it existing bucket
     else
-      buckets[bucket] = [word]
+      buckets_list[bucket] = [word] #create new bucket and append arrey with word init
     end
     i += 1
   end
 end
-#modify graph class
-class Graph
-  class Vertex
-    attr_accessor :value, :edges, :distance, :parent, :color, :visited
+
+class Graph #modify imported graph class for this problem
+  class Vertex 
+    attr_accessor :value, :edges, :color, :parent, :distance, :visited
     def initialize(value)
-      @value = value
-      @edges = LinkedList.new()
-      #extend vertex class with extra 3 instance variables
-      @distance = 0 #
-      @parent = nil #
-      @color = "white" # white is undiscovered vertex, grey is initialy discovered, black is discovered
+      @value = value #original vertex variable
+      @edges = LinkedList.new() #original vertex variable
+      #add for solution with colors & visited flag variable
+      @color = 'white'
+      @parent = nil
+      @distance = 0
       @visited = false
     end
-  end
-
-  def breadth_first_search(start_vertex, target_vertex)
+  end 
+  #implement BFS method, this is shortest path problem with unweighted graph, BFS is best solution
+  def bradth_first_search_colors(start_vertex, stop_vertex)
     queue = Array.new()
-    queue.push(search_vertex(start_vertex))
+    queue << search_vertex(start_vertex)
     until queue.empty?
       temp_vertex = queue.shift()
-      return if temp_vertex.value == target_vertex
-      temp_edge = temp_vertex.edges.head
-      until temp_edge == nil
-        edge_vertex = search_vertex(temp_edge.value)
-        if edge_vertex.color == 'white'
-          edge_vertex.color = 'gray' #indicates that shorter path is available if found again
-          edge_vertex.distance = temp_vertex.distance + 1
-          edge_vertex.parent = temp_vertex.value
-          queue.push(edge_vertex)
+      break if temp_vertex.value == stop_vertex #found stop condition
+      vertex_edges = temp_vertex.edges.head
+      until vertex_edges == nil
+        current_vertex = search_vertex(vertex_edges.value)
+        if current_vertex.color == 'white'
+          current_vertex.color = 'gray' #indicates that shorter path is available if found again
+          current_vertex.distance = temp_vertex.distance + 1
+          current_vertex.parent = temp_vertex.value
+          queue << current_vertex
         end
-        temp_edge = temp_edge.link
+        vertex_edges = vertex_edges.link
       end
-      temp_vertex.color = 'black'
+      temp_vertex.color = 'black' #completly explored tree
     end
+    graph_traversal(start_vertex, stop_vertex)
   end
 
-  def bfs(start_vertex, target_vertex) #Without colors, but with flag
+  def bradth_first_search_visited(start_vertex, stop_vertex)
     queue = Array.new()
-    queue.push(search_vertex(start_vertex))
+    queue << search_vertex(start_vertex)
     until queue.empty?
       temp_vertex = queue.shift()
-      temp_edge = temp_vertex.edges.head 
-      until temp_edge == nil
-        edge_vertex = search_vertex(temp_edge.value)
-        if edge_vertex.visited == false
-          edge_vertex.visited = true
-          edge_vertex.parent = temp_vertex.value
-          queue.push(edge_vertex)
+      break if temp_vertex.value == stop_vertex
+      vertex_edges = temp_vertex.edges.head
+      until vertex_edges == nil
+        current_vertex = search_vertex(vertex_edges.value)
+        if current_vertex.visited == false
+          current_vertex.parent = temp_vertex.value
+          current_vertex.visited = true
+          queue << current_vertex
         end
-        temp_edge = temp_edge.link
+        vertex_edges = vertex_edges.link
       end
       temp_vertex.visited = true
     end
+    graph_traversal(start_vertex, stop_vertex)
   end
 
-  def path_traversal(vertex)
-    container = Array.new()
-    start = search_vertex(vertex)
-    container << start.value
-    until start.parent == nil
-      container << start.parent
-      start = search_vertex(start.parent)
+  def graph_traversal(start_vertex, stop_vertex)
+    #connect path via parent link
+    path = Array.new()
+    current_vertex = search_vertex(stop_vertex)
+    until current_vertex.parent == nil
+      path.unshift(current_vertex.value)
+      current_vertex = search_vertex(current_vertex.parent)
     end
-    
-    container.reverse
+    path.unshift(current_vertex.value)
   end
 end
-#create new graph
-word_graph = Graph.new()
-#add vertices to graph
-buckets.keys.each do |key|
-  buckets[key].each do |word|
-    word_graph.add_vertex(word)
+
+#create graph 
+graph = Graph.new()
+#create vertices
+buckets_list.keys.each do |key|
+  buckets_list[key].each do |word|
+    graph.add_vertex(word)
   end
 end
-#add edges between words with 1 diff letter
-buckets.keys.each do |key|
-  buckets[key].each do |a|
-    buckets[key].each do |b|
-      word_graph.add_edge(a, b) if a != b
+#create edges
+buckets_list.keys.each do |key|
+  buckets_list[key].each do |x|
+    buckets_list[key].each do |y|
+      graph.add_edge(x,y) if x != y
     end
   end
 end
 
-word_graph.bfs('tic', 'zoo')
+#p graph.bradth_first_search_colors('dog','cat')
+p graph.bradth_first_search_visited('dog','cat')
 
-p word_graph.path_traversal('zoo')
