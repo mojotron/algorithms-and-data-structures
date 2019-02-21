@@ -1,105 +1,90 @@
-require_relative "test.rb"
-list_of_words = "english_dictionary/three_letter_words.txt"
-buckets = Hash.new()
-#create buckest, each bucket holds all words that are diff by 1 char
-word_file = File.open(list_of_words, 'r')
-word_file.each do |line|
-  word = line.chomp
-  i = 0
-  while i < word.length
-    bucket = "#{word[0...i]}_#{word[i+1..-1]}"
-    if buckets.include?(bucket)
-      buckets[bucket] << word
-    else
-      buckets[bucket] = [word]
+grid = Array.new(8){Array.new(8){0}}
+
+def print_grid(grid)
+  grid.size.times do |i|
+    i.size.times do |j|
+      print "#{grid[i][j] < 10 ? 0 : ''}#{grid[i][j]} "
     end
-    i += 1
+    puts
   end
 end
-#modify graph class
-class Graph
-  class Vertex
-    attr_accessor :value, :edges, :distance, :parent, :color, :visited
-    def initialize(value)
-      @value = value
-      @edges = LinkedList.new()
-      #extend vertex class with extra 3 instance variables
-      @distance = 0 #
-      @parent = nil #
-      @color = "white" # white is undiscovered vertex, grey is initialy discovered, black is discovered
-      @visited = false
-    end
+
+print_grid(grid)
+
+def next_y(x, move)
+  if move == 0
+    x = x + 2
+  elsif move == 1
+    x = x + 1
+  elsif move == 2
+    x = x - 1
+  elsif move == 3
+    x = x - 2
+  elsif move == 4
+    x = x - 2
+  elsif move == 5
+    x = x - 1
+  elsif move == 6
+    x = x + 1
+  elsif move == 7
+    x = x + 2
   end
 
-  def breadth_first_search(start_vertex, target_vertex)
-    queue = Array.new()
-    queue.push(search_vertex(start_vertex))
-    until queue.empty?
-      temp_vertex = queue.shift()
-      return if temp_vertex.value == target_vertex
-      temp_edge = temp_vertex.edges.head
-      until temp_edge == nil
-        edge_vertex = search_vertex(temp_edge.value)
-        if edge_vertex.color == 'white'
-          edge_vertex.color = 'gray' #indicates that shorter path is available if found again
-          edge_vertex.distance = temp_vertex.distance + 1
-          edge_vertex.parent = temp_vertex.value
-          queue.push(edge_vertex)
-        end
-        temp_edge = temp_edge.link
-      end
-      temp_vertex.color = 'black'
-    end
+  if x < 0 || x > 7
+    return -1
+  else
+    return x
+  end
+end
+
+def next_x(y, move)
+  if move == 0
+    y = y + 1
+  elsif move == 1
+    y = y + 2
+  elsif move == 2
+    y = y + 2
+  elsif move == 3
+    y = y + 1
+  elsif move == 4
+    y = y - 1
+  elsif move == 5
+    y = y - 2
+  elsif move == 6
+    y = y - 2
+  elsif move == 7
+    y = y - 1
   end
 
-  def bfs(start_vertex, target_vertex) #Without colors, but with flag
-    queue = Array.new()
-    queue.push(search_vertex(start_vertex))
-    until queue.empty?
-      temp_vertex = queue.shift()
-      temp_edge = temp_vertex.edges.head 
-      until temp_edge == nil
-        edge_vertex = search_vertex(temp_edge.value)
-        if edge_vertex.visited == false
-          edge_vertex.visited = true
-          edge_vertex.parent = temp_vertex.value
-          queue.push(edge_vertex)
-        end
-        temp_edge = temp_edge.link
-      end
-      temp_vertex.visited = true
-    end
+  if y < 0 || y > 7
+    return -1
+  else
+    return y
   end
+end
 
-  def path_traversal(vertex)
-    container = Array.new()
-    start = search_vertex(vertex)
-    container << start.value
-    until start.parent == nil
-      container << start.parent
-      start = search_vertex(start.parent)
-    end
+def solve(x,y,number, grid)
+  
+  move = 0
+
+  return 1 if number == 64
+  if grid[x][y] == 0
     
-    container.reverse
-  end
-end
-#create new graph
-word_graph = Graph.new()
-#add vertices to graph
-buckets.keys.each do |key|
-  buckets[key].each do |word|
-    word_graph.add_vertex(word)
-  end
-end
-#add edges between words with 1 diff letter
-buckets.keys.each do |key|
-  buckets[key].each do |a|
-    buckets[key].each do |b|
-      word_graph.add_edge(a, b) if a != b
+    while move < 8 
+      if next_x(x, move) != -1 && next_y(y, move) != -1
+        grid[x][y] = number
+        if solve(next_x(x, move),next_y(y, move),number + 1, grid)
+          return true
+        end
+      end
+      move += 1
     end
+    grid[x][y] = 0
   end
+  
+  return false
 end
 
-word_graph.bfs('tic', 'zoo')
-
-p word_graph.path_traversal('zoo')
+solve(0, 0, 0, grid)
+puts
+print_grid(grid)

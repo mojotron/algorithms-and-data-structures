@@ -1,5 +1,5 @@
 class LinkedList #helper class for representing list of edges of single vertex
-  class Node #LL helper class for representing sinle edge
+  class Node #LL helper class for representing single edge
     attr_accessor :value, :link
     def initialize(value) 
       @value = value
@@ -11,6 +11,16 @@ class LinkedList #helper class for representing list of edges of single vertex
   def initialize()
     @head = nil
     @tail = nil
+  end
+
+  def list_size()
+    temp_node = @head
+    size = 0
+    until temp_node == nil
+      size += 1
+      temp_node = temp_node.link
+    end
+    size
   end
 
   def list_contains?(value)
