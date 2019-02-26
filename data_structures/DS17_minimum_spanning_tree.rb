@@ -59,11 +59,47 @@ class DisjoinSet
     @parents.each do |node, id|
       @parents[node] = a_id if id == b_id
     end
+  end
 end
+
+class PriorityQueue
+  attr_accessor :queue 
+  def initialize()
+    @queue = Hash.new()
+  end
+
+  def is_empty?
+    @queue.empty?
+  end
+
+  def insert(value, priority)
+    @queue[value] = priority
+    sort_priority()
+  end
+
+  def get_top_priority()
+    @queue.shift
+  end
+
+  def sort_priority()
+    @queue = @queue.sort_by { |value, priority| priority}.to_h
+  end
 end
 
 class Graph #main class for creating graph object
   #modify for weight
+  class Vertex 
+    attr_accessor :value, :edges, :color, :parent, :distance, :visited
+    def initialize(value)
+      @value = value #original vertex variable
+      @edges = LinkedList.new() #original vertex variable
+      #add for solution with colors & visited flag variable
+      @color = 'white'
+      @parent = nil
+      @distance = 0
+      @visited = false
+    end
+  end
   def print_graph()#print all vertices with edges
     @vertices.each { |vertex| puts "[#{vertex.value}]>>#{vertex.edges.get_list}" }
   end
@@ -77,29 +113,25 @@ class Graph #main class for creating graph object
     vertex_a.edges.append(vertex_b.value, wight)
   end
 
-  def dfs(start_vertex)
-  end
-
-  def has_cycle?()
-  end
-
-  def kruskals_spanning_tree_algorithm()
-    #stop condition is number of vertices - 1
-    stop_condition = @vertices.size - 1
-    weight = 0
-    edges_list = []
-    @vertices.each do |v|
-      temp = v.edges.head
+  def get_edges_sorted(vertices)
+    edge_list = Array.new()
+    vertices.each do |vertex|
+      temp = vertex.edges.head
       until temp == nil
-        current = [[v.value, temp.value].sort, temp.weight].flatten
-        edges_list << current if !edges_list.include?(current) 
+        current = [[vertex.value, temp.value].sort, temp.weight].flatten
+        edge_list << current if !edge_list.include?(current)
         temp = temp.link
       end
     end
-    edges_list.sort_by! {|e| e[2]}
-    spanning_list = []
+    edge_list.sort_by { |edge| edge[2] }
+  end
+
+  def kruskals_spanning_tree_algorithm()
+    weight = 0
+    edges_list = get_edges_sorted(@vertices)
+    spanning_list = Array.new()
     unions = DisjoinSet.new(@vertices)
-    
+
     edges_list.each do |edge|
       if !unions.connected?(edge[0], edge[1])
         unions.union(edge[0], edge[1])
@@ -107,7 +139,68 @@ class Graph #main class for creating graph object
         weight += edge[2]
       end
     end
-    weight
+    [weight, spanning_list]
+  end
+
+  def get_vertex_edges(vertex)
+    container = []
+    temp_node = vertex.edges.head
+    until temp_node == nil
+      container << [[vertex.value, temp_node.value].sort, temp_node.weight].flatten
+      temp_node = temp_node.link
+    end
+    container.sort_by {|i| i[2]}
+  end
+
+  def get_vertices()
+    container = []
+    @vertices.each do |v|
+      container << v
+    end
+    container
+  end
+
+  def get_smallest(queue)
+    smallest = Float::INFINITY
+    target = nil
+    queue.each do |v|
+      if v.distance < smallest
+        smallest = v.distance
+        target = v
+      end
+    end
+    target
+
+  end
+
+  def prims_spanning_tree_algorithm(start_vertex)
+    mst = []
+    @vertices.each do |v|
+      v.parent = nil
+      v.distance = Float::INFINITY
+    end
+    start = search_vertex(start_vertex)
+    start.distance = 0
+    queue = get_vertices()
+    until queue.empty?
+      temp_vertex = queue.delete(get_smallest(queue))
+      ###
+      if temp_vertex.parent != nil
+        mst << [temp_vertex.parent, temp_vertex.value]
+      end
+      ###
+      temp_edges = temp_vertex.edges.head
+      until temp_edges == nil
+        current_vertex = search_vertex(temp_edges.value)
+        if temp_edges.weight < current_vertex.distance
+          current_vertex.parent = temp_vertex.value
+          current_vertex.distance = temp_edges.weight
+        end
+        temp_edges = temp_edges.link
+      end
+     
+    end
+    mst
   end
 end
 
@@ -137,4 +230,5 @@ x.add_edge('D', 'C', 3)
 x.add_edge('D', 'T', 2)
 x.add_edge('T', 'D', 2)
 #x.print_graph()
-p x.kruskals_spanning_tree_algorithm()
+#p x.kruskals_spanning_tree_algorithm()
+p x.prims_spanning_tree_algorithm('A')

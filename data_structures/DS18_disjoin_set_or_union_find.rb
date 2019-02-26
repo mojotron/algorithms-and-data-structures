@@ -1,5 +1,3 @@
-
-
 class DisjoinSet
   attr_accessor :parents
   def initialize(vertices)
@@ -18,8 +16,6 @@ class DisjoinSet
     @parents[b] = find(a)
   end
 end
-
-
 
 vertices = ('A'..'E').to_a
 
