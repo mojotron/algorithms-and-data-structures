@@ -62,30 +62,6 @@ class DisjoinSet
   end
 end
 
-class PriorityQueue
-  attr_accessor :queue 
-  def initialize()
-    @queue = Hash.new()
-  end
-
-  def is_empty?
-    @queue.empty?
-  end
-
-  def insert(value, priority)
-    @queue[value] = priority
-    sort_priority()
-  end
-
-  def get_top_priority()
-    @queue.shift
-  end
-
-  def sort_priority()
-    @queue = @queue.sort_by { |value, priority| priority}.to_h
-  end
-end
-
 class Graph #main class for creating graph object
   #modify for weight
   class Vertex 
@@ -142,16 +118,6 @@ class Graph #main class for creating graph object
     [weight, spanning_list]
   end
 
-  def get_vertex_edges(vertex)
-    container = []
-    temp_node = vertex.edges.head
-    until temp_node == nil
-      container << [[vertex.value, temp_node.value].sort, temp_node.weight].flatten
-      temp_node = temp_node.link
-    end
-    container.sort_by {|i| i[2]}
-  end
-
   def get_vertices()
     container = []
     @vertices.each do |v|
@@ -170,7 +136,19 @@ class Graph #main class for creating graph object
       end
     end
     target
+  end
 
+  def get_weight(edge)
+    temp = search_vertex(edge[0]).edges.head
+    until temp == nil
+      return temp.weight if temp.value == edge[1]
+      temp = temp.link
+    end
+    nil
+  end
+
+  def get_total_weight(edges)
+    edges.reduce(0) {|total, edge| total += edge[2]}
   end
 
   def prims_spanning_tree_algorithm(start_vertex)
@@ -184,11 +162,11 @@ class Graph #main class for creating graph object
     queue = get_vertices()
     until queue.empty?
       temp_vertex = queue.delete(get_smallest(queue))
-      ###
+      
       if temp_vertex.parent != nil
-        mst << [temp_vertex.parent, temp_vertex.value]
+        mst << [temp_vertex.parent, temp_vertex.value, get_weight([temp_vertex.parent, temp_vertex.value])]
       end
-      ###
+      
       temp_edges = temp_vertex.edges.head
       until temp_edges == nil
         current_vertex = search_vertex(temp_edges.value)
@@ -197,10 +175,39 @@ class Graph #main class for creating graph object
           current_vertex.distance = temp_edges.weight
         end
         temp_edges = temp_edges.link
-      end
-     
+      end 
     end
-    mst
+    [get_total_weight(mst), mst]
+  end
+  ##bonus shortes path
+  def dijkstas_shortes_path_algorithm(start_vertex)
+    result = []
+    @vertices.each do |v|
+      v.parent = nil
+      v.distance = Float::INFINITY
+    end
+    start = search_vertex(start_vertex)
+    start.distance = 0
+    queue = get_vertices()
+    until queue.empty?
+      temp_vertex = queue.delete(get_smallest(queue))
+      
+      temp_edges = temp_vertex.edges.head
+      until temp_edges == nil
+        #NOTE!!!
+        new_distance = temp_vertex.distance + temp_edges.weight
+        #NOTE!!!
+        current_vertex = search_vertex(temp_edges.value)
+        if new_distance < current_vertex.distance
+          current_vertex.parent = temp_vertex.value
+          current_vertex.distance = new_distance
+        end
+        temp_edges = temp_edges.link
+      end
+    end
+    @vertices.each do |v| #or make separet method
+      p "#{v.value}=>#{v.distance}"
+    end
   end
 end
 
@@ -231,4 +238,5 @@ x.add_edge('D', 'T', 2)
 x.add_edge('T', 'D', 2)
 #x.print_graph()
 #p x.kruskals_spanning_tree_algorithm()
-p x.prims_spanning_tree_algorithm('A')
+#p x.prims_spanning_tree_algorithm('A')
+x.dijkstas_shortes_path_algorithm('S')
