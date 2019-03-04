@@ -1,90 +1,90 @@
-grid = Array.new(8){Array.new(8){0}}
+class MaxHeap 
+  attr_accessor :heap 
+  def initialize()
+    @heap = [nil]
+  end
 
-def print_grid(grid)
-  grid.size.times do |i|
-    i.size.times do |j|
-      print "#{grid[i][j] < 10 ? 0 : ''}#{grid[i][j]} "
+  def size()
+    @heap.size - 1
+  end
+
+  def insert(value)
+    @heap << value
+    bubble_up(self.size)
+  end
+
+  def bubble_up(index)
+    while index / 2 > 0
+      if @heap[index] >= @heap[index / 2]
+        @heap[index], @heap[index / 2] = @heap[index / 2], @heap[index]
+      end 
+      index /= 2
     end
-    puts
-  end
-end
-
-print_grid(grid)
-
-def next_y(x, move)
-  if move == 0
-    x = x + 2
-  elsif move == 1
-    x = x + 1
-  elsif move == 2
-    x = x - 1
-  elsif move == 3
-    x = x - 2
-  elsif move == 4
-    x = x - 2
-  elsif move == 5
-    x = x - 1
-  elsif move == 6
-    x = x + 1
-  elsif move == 7
-    x = x + 2
   end
 
-  if x < 0 || x > 7
-    return -1
-  else
-    return x
-  end
-end
-
-def next_x(y, move)
-  if move == 0
-    y = y + 1
-  elsif move == 1
-    y = y + 2
-  elsif move == 2
-    y = y + 2
-  elsif move == 3
-    y = y + 1
-  elsif move == 4
-    y = y - 1
-  elsif move == 5
-    y = y - 2
-  elsif move == 6
-    y = y - 2
-  elsif move == 7
-    y = y - 1
+  def max_value()
+    @heap[1]
   end
 
-  if y < 0 || y > 7
-    return -1
-  else
-    return y
+  def get_max_value()
+    largest = @heap[1]
+    @heap[1] = @heap.pop()
+    heapify_max(1)
+    largest
   end
-end
 
-def solve(x,y,number, grid)
-  
-  move = 0
-
-  return 1 if number == 64
-  if grid[x][y] == 0
-    
-    while move < 8 
-      if next_x(x, move) != -1 && next_y(y, move) != -1
-        grid[x][y] = number
-        if solve(next_x(x, move),next_y(y, move),number + 1, grid)
-          return true
-        end
-      end
-      move += 1
+  def heapify_max(index)
+    left_child = index * 2
+    right_child = index * 2 + 1
+    if left_child <= self.size && @heap[left_child] > @heap[index]
+      largest = left_child
+    else
+      largest = index
     end
-    grid[x][y] = 0
+    if right_child <= self.size && @heap[right_child] > @heap[largest]
+      largest = right_child
+    end
+    if largest != index
+      @heap[index], @heap[largest] = @heap[largest],@heap[index]
+      heapify_max(largest)
+    end
   end
-  
-  return false
+
+  def build_heap(arr)
+    @heap += arr
+    i = self.size / 2
+    while i > 0
+      heapify_max(i)
+      i -= 1
+    end
+    @heap
+  end
+
 end
 
-solve(0, 0, 0, grid)
-puts
-print_grid(grid)
+def heap_sort(arr)
+  h = MaxHeap.new()
+  h.build_heap(arr)
+  sort = []
+  until h.size == 0
+    h.heap[1], h.heap[h.size] = h.heap[h.size], h.heap[1]
+    sort << h.heap.pop()
+    h.heapify_max(1)
+  end
+  sort
+end
+
+arr = [3,6,9,1,10,7,33,12,42,13,2,15,65,71,16]
+x = MaxHeap.new()
+x.insert(3)
+x.insert(6)
+x.insert(9)
+x.insert(1)
+x.insert(10)
+x.insert(7)
+p x.heap
+y = MaxHeap.new()
+y.build_heap(arr)
+p y.heap
+
+p heap_sort(arr)

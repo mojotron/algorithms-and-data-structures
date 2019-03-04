@@ -1,12 +1,11 @@
 require_relative "DS16_graph_with_adjecency_list.rb"
-#Modify LL class, for weighted graph
 class LinkedList
-  class Node 
-    attr_accessor :value, :link, :weight #Note! Add weight
-    def initialize(value, weight = 0) 
+  class Node
+    attr_accessor :value, :link, :weight
+    def initialize(value, weight = 0)
       @value = value
       @link = nil
-      @weight = weight # Note! Add weight 
+      @weight = weight
     end
   end
 
@@ -14,14 +13,13 @@ class LinkedList
     container = Array.new()
     temp_node = @head
     until temp_node == nil
-      #Note! Return array, with edge and weight of edge
-      container << [temp_node.value, temp_node.weight] 
+      container << [temp_node.value, temp_node.weight]
       temp_node = temp_node.link
     end
     container
   end
-  #Note! Add weight attribut to new edge
-  def append(value, weight) #append node to end of list in constant time O(1), using tail pointer
+
+  def append(value, weight)
     new_node = Node.new(value, weight)
     if @head == nil
       @head = new_node
@@ -35,180 +33,164 @@ class LinkedList
 end
 
 class DisjoinSet
-  attr_accessor :parents
+  attr_accessor :set 
   def initialize(vertices)
-    @parents = {}
-    vertices.each_with_index do |vertex, id|
-      @parents[vertex.value] = id
-    end
+    @set = {}
+    vertices.each_with_index { |vertex, id| @set[vertex.value] = id }
   end
 
-  def find(vertex)
-    @parents[vertex]
+  def find(value)
+    @set[value]
   end
 
-  def connected?(a, b)
-    @parents[a] == @parents[b]
-  end
-
-  def union(a, b)
-    return if connected?(a, b)
-    a_id = find(a)
-    b_id = find(b)
-
-    @parents.each do |node, id|
-      @parents[node] = a_id if id == b_id
-    end
+  def union(value_a, value_b)
+    return nil if @set[value_a] == @set[value_b]
+    a_id = find(value_a)
+    b_id = find(value_b)
+    @set.each { |value, id| @set[value] = a_id if id == b_id }
   end
 end
 
-class Graph #main class for creating graph object
-  #modify for weight
-  class Vertex 
-    attr_accessor :value, :edges, :color, :parent, :distance, :visited
+class Graph
+  class Vertex
+    attr_accessor :value, :edges, :color, :distance, :parent
     def initialize(value)
-      @value = value #original vertex variable
-      @edges = LinkedList.new() #original vertex variable
-      #add for solution with colors & visited flag variable
-      @color = 'white'
+      @value = value
+      @edges = LinkedList.new()
+      @distance = Float::INFINITY
       @parent = nil
-      @distance = 0
-      @visited = false
     end
   end
-  def print_graph()#print all vertices with edges
+
+  def print_graph()
     @vertices.each { |vertex| puts "[#{vertex.value}]>>#{vertex.edges.get_list}" }
   end
-  #modify for weight
-  def add_edge(vertex_1, vertex_2, wight = 0)
+
+  def add_edge(vertex_1, vertex_2, weight)
     vertex_a = search_vertex(vertex_1)
     return nil if vertex_a == nil
     vertex_b = search_vertex(vertex_2)
     return nil if vertex_b == nil
     return nil if connected?(vertex_1, vertex_2)
-    vertex_a.edges.append(vertex_b.value, wight)
+    vertex_a.edges.append(vertex_b.value, weight)
   end
 
-  def get_edges_sorted(vertices)
-    edge_list = Array.new()
+  #kruskal helper method
+  def get_sorted_edges_by_weight(vertices)
+    edges_list = []
     vertices.each do |vertex|
-      temp = vertex.edges.head
-      until temp == nil
-        current = [[vertex.value, temp.value].sort, temp.weight].flatten
-        edge_list << current if !edge_list.include?(current)
-        temp = temp.link
+      temp_node = vertex.edges.head
+      until temp_node == nil
+        current = [[vertex.value, temp_node.value].sort, temp_node.weight].flatten
+        edges_list << current if !edges_list.include?(current) #graph is undirected, every edge is double
+        temp_node = temp_node.link
       end
     end
-    edge_list.sort_by { |edge| edge[2] }
+    edges_list.sort_by { |item| item[2] }
   end
 
-  def kruskals_spanning_tree_algorithm()
+  def kruskal_mst()
     weight = 0
-    edges_list = get_edges_sorted(@vertices)
-    spanning_list = Array.new()
-    unions = DisjoinSet.new(@vertices)
+    mst = []
+    disjoin_set = DisjoinSet.new(@vertices)
+    sorted_edges = get_sorted_edges_by_weight(@vertices)
 
-    edges_list.each do |edge|
-      if !unions.connected?(edge[0], edge[1])
-        unions.union(edge[0], edge[1])
-        spanning_list << edge
+    sorted_edges.each do |edge|
+      if disjoin_set.find(edge[0]) != disjoin_set.find(edge[1])
+        disjoin_set.union(edge[0], edge[1])
+        mst << edge
         weight += edge[2]
       end
     end
-    [weight, spanning_list]
+    [weight, mst]
   end
 
-  def get_vertices()
-    container = []
-    @vertices.each do |v|
-      container << v
-    end
-    container
+  #prims helper methods
+  def get_vertices(vertices)
+    @vertices.map {|vertex| vertex }
   end
 
-  def get_smallest(queue)
-    smallest = Float::INFINITY
-    target = nil
-    queue.each do |v|
-      if v.distance < smallest
-        smallest = v.distance
-        target = v
+  def get_smallest_distance(vertices) #get vertex with smallest distance
+    target_vertex = nil
+    smallest_distance = Float::INFINITY
+    vertices.each do |vertex|
+      if vertex.distance < smallest_distance
+        target_vertex = vertex
+        smallest_distance = vertex.distance
       end
     end
-    target
+    target_vertex
   end
 
-  def get_weight(edge)
-    temp = search_vertex(edge[0]).edges.head
-    until temp == nil
-      return temp.weight if temp.value == edge[1]
-      temp = temp.link
+  def get_edge_weight(vertex_1, vertex_2)
+    temp_node = search_vertex(vertex_1).edges.head
+    until temp_node == nil
+      return temp_node.weight if temp_node.value == vertex_2
+      temp_node = temp_node.link
     end
     nil
   end
 
   def get_total_weight(edges)
-    edges.reduce(0) {|total, edge| total += edge[2]}
+    edges.reduce(0) { |total, edge| total += edge[2] }
   end
 
-  def prims_spanning_tree_algorithm(start_vertex)
+  def prim_mst(start_vertex)
     mst = []
-    @vertices.each do |v|
-      v.parent = nil
-      v.distance = Float::INFINITY
+    @vertices.each do |vertex|
+      vertex.parent = nil
+      vertex.distance = Float::INFINITY
     end
     start = search_vertex(start_vertex)
     start.distance = 0
-    queue = get_vertices()
+    queue = get_vertices(@vertices)
     until queue.empty?
-      temp_vertex = queue.delete(get_smallest(queue))
-      
+      temp_vertex = queue.delete(get_smallest_distance(queue))
       if temp_vertex.parent != nil
-        mst << [temp_vertex.parent, temp_vertex.value, get_weight([temp_vertex.parent, temp_vertex.value])]
+        mst << [temp_vertex.parent, temp_vertex.value, get_edge_weight(temp_vertex.parent, temp_vertex.value)]
       end
-      
-      temp_edges = temp_vertex.edges.head
-      until temp_edges == nil
-        current_vertex = search_vertex(temp_edges.value)
-        if temp_edges.weight < current_vertex.distance
-          current_vertex.parent = temp_vertex.value
-          current_vertex.distance = temp_edges.weight
+      temp_node = temp_vertex.edges.head
+      until temp_node == nil
+        current_node = search_vertex(temp_node.value)
+        if temp_node.weight < current_node.distance
+          current_node.parent = temp_vertex.value
+          current_node.distance = temp_node.weight
         end
-        temp_edges = temp_edges.link
-      end 
+        temp_node = temp_node.link
+      end
     end
     [get_total_weight(mst), mst]
   end
-  ##bonus shortes path
-  def dijkstas_shortes_path_algorithm(start_vertex)
-    result = []
-    @vertices.each do |v|
-      v.parent = nil
-      v.distance = Float::INFINITY
+
+  #dijkstar helper
+  def print_distances(vertices)
+    vertices.each { |vertex| puts "#{vertex.value} - #{vertex.distance}" }
+  end
+
+  def dijkstra_shortest_path(start_vertex)
+    @vertices.each do |vertex|
+      vertex.parent = nil
+      vertex.distance = Float::INFINITY
     end
     start = search_vertex(start_vertex)
     start.distance = 0
-    queue = get_vertices()
+    queue = get_vertices(@vertices)
     until queue.empty?
-      temp_vertex = queue.delete(get_smallest(queue))
-      
-      temp_edges = temp_vertex.edges.head
-      until temp_edges == nil
-        #NOTE!!!
-        new_distance = temp_vertex.distance + temp_edges.weight
-        #NOTE!!!
-        current_vertex = search_vertex(temp_edges.value)
-        if new_distance < current_vertex.distance
-          current_vertex.parent = temp_vertex.value
-          current_vertex.distance = new_distance
+      temp_vertex = queue.delete(get_smallest_distance(queue))
+      temp_node = temp_vertex.edges.head
+      until temp_node == nil
+        new_distance = temp_vertex.distance + temp_node.weight
+        current_node = search_vertex(temp_node.value)
+        if new_distance < current_node.distance
+          current_node.parent = temp_vertex.value
+          current_node.distance = new_distance
         end
-        temp_edges = temp_edges.link
+        temp_node = temp_node.link
       end
     end
-    @vertices.each do |v| #or make separet method
-      p "#{v.value}=>#{v.distance}"
-    end
+    print_distances(@vertices)
   end
+
 end
 
 x = Graph.new()
@@ -236,7 +218,7 @@ x.add_edge('C', 'D', 3)
 x.add_edge('D', 'C', 3)
 x.add_edge('D', 'T', 2)
 x.add_edge('T', 'D', 2)
-#x.print_graph()
-#p x.kruskals_spanning_tree_algorithm()
-#p x.prims_spanning_tree_algorithm('A')
-x.dijkstas_shortes_path_algorithm('S')
+
+p x.kruskal_mst()
+p x.prim_mst('T')
+x.dijkstra_shortest_path('T')
